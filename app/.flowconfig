@@ -1,0 +1,33 @@
+[ignore]
+
+[untyped]
+.*/node_modules/mapbox-gl/src/.*
+.*/node_modules/react-map-gl/.*
+
+[options]
+types_first=true
+
+[libs]
+node_modules/mapbox-gl/flow-typed
+node_modules/mapbox-gl/dist/mapbox-gl.js.flow
+
+[declarations]
+.*/node_modules/.*
+
+[lints]
+all=warn
+
+# This is noisy for now. We *do* still want to warn on importing types
+# from untyped files, which is covered by untyped-type-import
+untyped-import=off
+
+[strict]
+nonstrict-import
+sketchy-null
+unclear-type
+unsafe-getters-setters
+untyped-import
+untyped-type-import
+
+[version]
+^0.134.0
