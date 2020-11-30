@@ -68,7 +68,7 @@ declare module "@deck.gl/mesh-layers/simple-mesh-layer/simple-mesh-layer" {
 
   import type { Position3D } from "@deck.gl/core/utils/positions";
 
-  declare export interface SimpleMesh {
+  declare export type SimpleMesh = {
     positions: Float32Array;
     normals: Float32Array;
     texCoords: Float32Array;

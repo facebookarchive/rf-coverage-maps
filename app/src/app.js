@@ -17,6 +17,8 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
 import {StaticMap} from 'react-map-gl';
 
+import type {PickInfo} from "@deck.gl/core/lib/deck";
+
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const MIN_ELEVATION = 10;
@@ -32,14 +34,6 @@ type ViewState = {
   pitch: number,
 };
 
-type HoverInfo = {
-  object: {
-    message: string,
-  },
-  x: number,
-  y: number,
-};
-
 type Point = {
   latitude: number,
   longitude: number,
@@ -48,6 +42,8 @@ type Point = {
   bearing: number,
   message: string,
 };
+
+type HoverInfo = PickInfo<Point>;
 
 function App(): React.Node {
   const [layers, setLayers] = useState(null);
@@ -93,7 +89,7 @@ function App(): React.Node {
           newLayers = newLayers.concat(lines);
           const rangeFactor = (-1 * 255) / (maxRssi - minRssi);
 
-          const iconLayer = new IconLayer({
+          const iconLayer = new IconLayer<Point>({
             id: 'icon-layer',
             data: newLayers,
             pickable: true,
@@ -101,7 +97,7 @@ function App(): React.Node {
             iconAtlas: 'arrow.png',
             iconMapping: ICON_MAPPING,
             // getIcon: return a string
-            getIcon: (_d: string) => 'marker',
+            getIcon: (_d: Point) => 'marker',
             sizeScale: 2,
             getPosition: (d: Point) => [d.latitude, d.longitude, d.height],
             getSize: (_d: Point) => 15,
@@ -113,7 +109,7 @@ function App(): React.Node {
             },
             getAngle: (d: Point) => d.bearing,
             billboard: false,
-            onHover: (info: HoverInfo) => setHoverInfo(info),
+            onHover: (info) => setHoverInfo(info),
           });
 
           const highestSignalLayer = new PointCloudLayer({

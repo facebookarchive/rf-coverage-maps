@@ -1116,7 +1116,7 @@ declare module "@deck.gl/layers/text-layer/font-atlas-manager" {
     };
     _getKey(): string;
   }
-  declare export interface FontSettings {
+  declare export type FontSettings = {
     fontSize?: number;
     buffer?: number;
     sdf?: boolean;
