@@ -109,7 +109,7 @@ function App(): React.Node {
               const red = parseInt(255 - (minRssi - d.rssi) * rangeFactor);
               const blue = 255 - red;
               const green = 255 - red - blue;
-              return [red, green, blue, red];
+              return [red, green, blue, 255];
             },
             getAngle: (d: Point) => d.bearing,
             billboard: false,
