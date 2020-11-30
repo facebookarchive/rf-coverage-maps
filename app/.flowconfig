@@ -13,6 +13,7 @@ node_modules/mapbox-gl/dist/mapbox-gl.js.flow
 
 [declarations]
 .*/node_modules/.*
+.*/flow-typed/npm/@mapbox.gl/.*
 
 [lints]
 all=warn

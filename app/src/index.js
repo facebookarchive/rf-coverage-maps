@@ -17,5 +17,6 @@ ReactDOM.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
+  // $FlowFixMe This will always exist or nothing will work.
   document.getElementById('root'),
 );
