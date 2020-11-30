@@ -15,7 +15,7 @@ import {useRef, useState} from 'react';
 import DeckGL from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
-import {StaticMap} from 'react-map-gl';
+import ReactMapGL, {NavigationControl} from 'react-map-gl';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
@@ -224,7 +224,11 @@ function App(): React.Node {
         controller={true}
         layers={layers}
         getTooltip={(p: Point) => p.message}>
-        <StaticMap mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle} />
+        <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
+          <div style={{position: 'absolute', right: 0}}>
+            <NavigationControl showCompass={true} showZoom={false} />
+          </div>
+        </ReactMapGL>
         <div
           style={{
             padding: 10,
