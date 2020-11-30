@@ -111,7 +111,7 @@ function App(): React.Node {
               const green = 255 - red - blue;
               return [red, green, blue, 255];
             },
-            getAngle: (d: Point) => d.bearing,
+            getAngle: (d: Point) => 180 - d.bearing,
             billboard: false,
             onHover: (info: HoverInfo) => setHoverInfo(info),
           });
