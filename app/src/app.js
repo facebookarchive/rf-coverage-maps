@@ -12,7 +12,7 @@
 import * as React from 'react';
 import MapScreen from './screens/mapscreen';
 import { createMuiTheme } from '@material-ui/core/styles';
-import { ThemeProvider } from '@material-ui/core/styles';
+import { MuiThemeProvider } from '@material-ui/core/styles';
 
 function App(): React.Node {
   const theme = createMuiTheme({
@@ -22,9 +22,9 @@ function App(): React.Node {
   });
 
   return (
-    <ThemeProvider theme={theme}>
+    <MuiThemeProvider theme={theme}>
       <MapScreen />
-    </ThemeProvider>
+    </MuiThemeProvider>
   );
 }
 
