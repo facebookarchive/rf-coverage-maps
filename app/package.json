@@ -25,7 +25,8 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-map-gl": "^4.1.2",
-    "react-scripts": "^3.4.3"
+    "react-scripts": "^3.4.3",
+    "react-vis": "^1.11.7"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
