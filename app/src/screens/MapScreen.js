@@ -124,7 +124,6 @@ function MapScreen(): React.Node {
           const lines = processFileData(content);
           newLayers = newLayers.concat(lines);
           xyPoints = xyPoints.concat(pointsToXY(lines));
-          console.log(xyPoints);
           const rangeFactor = (-1 * 255) / (maxRssi - minRssi);
 
           const iconLayer = new IconLayer<Point>({
