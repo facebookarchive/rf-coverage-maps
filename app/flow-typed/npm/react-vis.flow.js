@@ -9,33 +9,29 @@ declare module "react-vis" {
   import type {
     Component,
     PureComponent,
-    ReactChild,
     Node,
-    SFC,
-    MouseEventHandler,
-    TouchEventHandler,
-    WheelEventHandler,
-    MouseEvent,
-    CSSProperties,
+    StatelessFunctionalComponent,
   } from "react";
+
+  declare type CSSProperties = $Shape<CSSStyleDeclaration>;
 
   declare export type AbstractSeriesPoint = {
     [key: string]: any;
   }
-  declare export type RVMouseEventHandler = MouseEventHandler<HTMLElement>;
-  declare export type RVTouchEventHandler = TouchEventHandler<HTMLElement>;
-  declare export type RVWheelEventHandler = WheelEventHandler<HTMLElement>;
+  declare export type RVMouseEventHandler = (SyntheticMouseEvent<HTMLElement>)=>void;
+  declare export type RVTouchEventHandler = (SyntheticTouchEvent<HTMLElement>)=>void;
+  declare export type RVWheelEventHandler = (SyntheticWheelEvent<HTMLElement>)=>void;
   declare export type RVItemEventHandler = (
     item: any,
     index: number,
-    event: MouseEvent<HTMLElement>
+    event: SyntheticMouseEvent<HTMLElement>
   ) => void;
   declare export type RVValueEventHandler<T: AbstractSeriesPoint> = (
     datapoint: T,
-    event: MouseEvent<HTMLElement>
+    event: SyntheticMouseEvent<HTMLElement>
   ) => void;
   declare export type RVNearestXData<T: AbstractSeriesPoint> = {
-    event: MouseEvent<HTMLElement>,
+    event: SyntheticMouseEvent<HTMLElement>,
     innerX: $PropertyType<T, "x">,
     index: number,
     ...
@@ -45,7 +41,7 @@ declare module "react-vis" {
     data: RVNearestXData<T>
   ) => void;
   declare export type RVNearestXYData<T: AbstractSeriesPoint> = {
-    event: MouseEvent<HTMLElement>,
+    event: SyntheticMouseEvent<HTMLElement>,
     innerX: $PropertyType<T, "x">,
     innerY: $PropertyType<T, "y">,
     index: number,
@@ -366,62 +362,62 @@ declare module "react-vis" {
     ...
   } & AbstractSeriesProps<LineSeriesPoint>;
 
-  declare export class LineSeries mixins AbstractSeries<LineSeriesProps> {}
+  declare export class LineSeries extends AbstractSeries<LineSeriesProps> {}
   declare export type LineSeriesCanvasProps = {
     strokeWidth?: number,
     ...
   } & AbstractSeriesProps<LineSeriesPoint>;
 
   declare export class LineSeriesCanvas
-    mixins AbstractSeries<LineSeriesCanvasProps> {}
+    extends AbstractSeries<LineSeriesCanvasProps> {}
   declare export type HorizontalBarSeriesProps = {
     ...
   } & AbstractSeriesProps<HorizontalBarSeriesPoint>;
 
   declare export class HorizontalBarSeries
-    mixins AbstractSeries<HorizontalBarSeriesProps> {}
+    extends AbstractSeries<HorizontalBarSeriesProps> {}
   declare export type HorizontalBarSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<HorizontalBarSeriesPoint>;
 
   declare export class HorizontalBarSeriesCanvas
-    mixins AbstractSeries<HorizontalBarSeriesCanvasProps> {}
+    extends AbstractSeries<HorizontalBarSeriesCanvasProps> {}
   declare export type VerticalBarSeriesProps = {
     ...
   } & AbstractSeriesProps<VerticalBarSeriesPoint>;
 
   declare export class VerticalBarSeries
-    mixins AbstractSeries<VerticalBarSeriesProps> {}
+    extends AbstractSeries<VerticalBarSeriesProps> {}
   declare export type VerticalBarSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<VerticalBarSeriesPoint>;
 
   declare export class VerticalBarSeriesCanvas
-    mixins AbstractSeries<VerticalBarSeriesCanvasProps> {}
+    extends AbstractSeries<VerticalBarSeriesCanvasProps> {}
   declare export type VerticalRectSeriesProps = {
     ...
   } & AbstractSeriesProps<VerticalRectSeriesPoint>;
 
   declare export class VerticalRectSeries
-    mixins AbstractSeries<VerticalRectSeriesProps> {}
+    extends AbstractSeries<VerticalRectSeriesProps> {}
   declare export type VerticalRectSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<VerticalRectSeriesPoint>;
 
   declare export class VerticalRectSeriesCanvas
-    mixins AbstractSeries<VerticalRectSeriesCanvasProps> {}
+    extends AbstractSeries<VerticalRectSeriesCanvasProps> {}
   declare export type HorizontalRectSeriesProps = {
     ...
   } & AbstractSeriesProps<HorizontalRectSeriesPoint>;
 
   declare export class HorizontalRectSeries
-    mixins AbstractSeries<HorizontalRectSeriesProps> {}
+    extends AbstractSeries<HorizontalRectSeriesProps> {}
   declare export type HorizontalRectSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<HorizontalRectSeriesPoint>;
 
   declare export class HorizontalRectSeriesCanvas
-    mixins AbstractSeries<HorizontalRectSeriesCanvasProps> {}
+    extends AbstractSeries<HorizontalRectSeriesCanvasProps> {}
   declare export type LabelSeriesProps = {
     allowOffsetToBeReversed?: boolean,
     marginLeft?: number,
@@ -432,13 +428,13 @@ declare module "react-vis" {
     ...
   } & AbstractSeriesProps<LabelSeriesPoint>;
 
-  declare export class LabelSeries mixins AbstractSeries<LabelSeriesProps> {}
+  declare export class LabelSeries extends AbstractSeries<LabelSeriesProps> {}
   declare export type PolygonSeriesProps = {
     ...
   } & AbstractSeriesProps<PolygonSeriesPoint>;
 
   declare export class PolygonSeries
-    mixins AbstractSeries<PolygonSeriesProps> {}
+    extends AbstractSeries<PolygonSeriesProps> {}
   declare export type RectSeriesProps = {
     linePosAttr?: string,
     valuePosAttr?: string,
@@ -447,39 +443,39 @@ declare module "react-vis" {
     ...
   } & AbstractSeriesProps<RectSeriesPoint>;
 
-  declare export class RectSeries mixins AbstractSeries<RectSeriesProps> {}
+  declare export class RectSeries extends AbstractSeries<RectSeriesProps> {}
   declare export type RectSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<RectSeriesPoint>;
 
   declare export class RectSeriesCanvas
-    mixins AbstractSeries<RectSeriesCanvasProps> {}
+    extends AbstractSeries<RectSeriesCanvasProps> {}
   declare export type MarkSeriesProps = {
     getNull?: RVGetNull<MarkSeriesPoint>,
     strokeWidth?: number,
     ...
   } & AbstractSeriesProps<MarkSeriesPoint>;
 
-  declare export class MarkSeries mixins AbstractSeries<MarkSeriesProps> {}
+  declare export class MarkSeries extends AbstractSeries<MarkSeriesProps> {}
   declare export type MarkSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<MarkSeriesPoint>;
 
   declare export class MarkSeriesCanvas
-    mixins AbstractSeries<MarkSeriesCanvasProps> {}
+    extends AbstractSeries<MarkSeriesCanvasProps> {}
   declare export type WhiskerSeriesProps = {
     strokeWidth?: number,
     ...
   } & AbstractSeriesProps<WhiskerSeriesPoint>;
 
   declare export class WhiskerSeries
-    mixins AbstractSeries<WhiskerSeriesProps> {}
+    extends AbstractSeries<WhiskerSeriesProps> {}
   declare export type HeatmapSeriesProps = {
     ...
   } & AbstractSeriesProps<HeatmapSeriesPoint>;
 
   declare export class HeatmapSeries
-    mixins AbstractSeries<HeatmapSeriesProps> {}
+    extends AbstractSeries<HeatmapSeriesProps> {}
   declare export type ContourSeriesProps = {
     bandwidth?: number,
     marginLeft?: number,
@@ -488,7 +484,7 @@ declare module "react-vis" {
   } & AbstractSeriesProps<ContourSeriesPoint>;
 
   declare export class ContourSeries
-    mixins AbstractSeries<ContourSeriesProps> {}
+    extends AbstractSeries<ContourSeriesProps> {}
   declare export type CustomSVGSeriesProps = {
     customComponent?: string | Function,
     marginLeft?: number,
@@ -497,13 +493,13 @@ declare module "react-vis" {
   } & AbstractSeriesProps<CustomSVGSeriesPoint>;
 
   declare export class CustomSVGSeries
-    mixins AbstractSeries<CustomSVGSeriesProps> {}
+    extends AbstractSeries<CustomSVGSeriesProps> {}
   declare export type AreaSeriesProps = {
     getNull?: RVGetNull<AreaSeriesPoint>,
     ...
   } & AbstractSeriesProps<AreaSeriesPoint>;
 
-  declare export class AreaSeries mixins AbstractSeries<AreaSeriesProps> {}
+  declare export class AreaSeries extends AbstractSeries<AreaSeriesProps> {}
   declare export type ArcSeriesProps = {
     _radiusValue?: $PropertyType<ArcSeriesPoint, "_radius">,
     radiusDomain?: Array<$PropertyType<ArcSeriesPoint, "radius">>,
@@ -544,7 +540,7 @@ declare module "react-vis" {
     ...
   } & AbstractSeriesProps<ArcSeriesPoint>;
 
-  declare export class ArcSeries mixins AbstractSeries<ArcSeriesProps> {}
+  declare export class ArcSeries extends AbstractSeries<ArcSeriesProps> {}
   declare export type LineMarkSeriesProps = {
     strokeStyle?: "dashed" | "solid",
     curve?: string | Function,
@@ -555,13 +551,13 @@ declare module "react-vis" {
   } & AbstractSeriesProps<LineMarkSeriesPoint>;
 
   declare export class LineMarkSeries
-    mixins AbstractSeries<LineMarkSeriesProps> {}
+    extends AbstractSeries<LineMarkSeriesProps> {}
   declare export type LineMarkSeriesCanvasProps = {
     ...
   } & AbstractSeriesProps<LineMarkSeriesPoint>;
 
   declare export class LineMarkSeriesCanvas
-    mixins AbstractSeries<LineMarkSeriesCanvasProps> {}
+    extends AbstractSeries<LineMarkSeriesCanvasProps> {}
   declare export type HintProps = {
     marginTop?: number;
     marginLeft?: number;
@@ -693,7 +689,7 @@ declare module "react-vis" {
   } & AbstractSeriesProps<DecorativeAxisPoint>;
 
   declare export class DecorativeAxis
-    mixins AbstractSeries<DecorativeAxisProps> {}
+    extends AbstractSeries<DecorativeAxisProps> {}
   declare export type XAxisProps = {
     orientation?: "top" | "bottom";
     attr?: string;
@@ -723,7 +719,7 @@ declare module "react-vis" {
     innerWidth?: number;
     innerHeight?: number;
   }
-  declare export var XAxis: SFC<XAxisProps>;
+  declare export var XAxis: StatelessFunctionalComponent<XAxisProps>;
   declare export type YAxisProps = {
     orientation?: "left" | "right";
     attr?: string;
@@ -753,7 +749,7 @@ declare module "react-vis" {
     innerWidth?: number;
     innerHeight?: number;
   }
-  declare export var YAxis: SFC<YAxisProps>;
+  declare export var YAxis: StatelessFunctionalComponent<YAxisProps>;
   declare export type CircularGridLinesProps = {
     centerX?: number;
     centerY?: number;
@@ -842,7 +838,7 @@ declare module "react-vis" {
     innerWidth?: number;
     innerHeight?: number;
   }
-  declare export var VerticalGridLines: SFC<VerticalGridLinesProps>;
+  declare export var VerticalGridLines: StatelessFunctionalComponent<VerticalGridLinesProps>;
   declare export type HorizontalGridLinesProps = {
     direction?: "horizontal";
     attr?: string;
@@ -869,7 +865,7 @@ declare module "react-vis" {
     innerWidth?: number;
     innerHeight?: number;
   }
-  declare export var HorizontalGridLines: SFC<HorizontalGridLinesProps>;
+  declare export var HorizontalGridLines: StatelessFunctionalComponent<HorizontalGridLinesProps>;
   declare export type VoronoiProps = {
     className?: string;
     extent: Array<Array<number>>;
@@ -882,7 +878,7 @@ declare module "react-vis" {
     x?: Function;
     y?: Function;
   }
-  declare export var Voronoi: SFC<VoronoiProps>;
+  declare export var Voronoi: StatelessFunctionalComponent<VoronoiProps>;
   declare export type DiscreteColorLegendProps = {
     className?: string;
     items: Array<
@@ -893,7 +889,7 @@ declare module "react-vis" {
           ...
         }
       | string
-      | ReactChild
+      | Node
     >;
     onItemClick?: RVMouseEventHandler;
     onItemMouseEnter?: RVItemEventHandler;
@@ -902,7 +898,7 @@ declare module "react-vis" {
     width?: number;
     orientation?: "vertical" | "horizontal";
   }
-  declare export var DiscreteColorLegend: SFC<DiscreteColorLegendProps>;
+  declare export var DiscreteColorLegend: StatelessFunctionalComponent<DiscreteColorLegendProps>;
   declare export type SearchableDiscreteColorLegendProps = {
     className?: string;
     items: Array<
@@ -913,7 +909,7 @@ declare module "react-vis" {
           ...
         }
       | string
-      | ReactChild
+      | Node
     >;
     onItemClick?: RVMouseEventHandler;
     onItemMouseEnter?: RVItemEventHandler;
@@ -926,7 +922,7 @@ declare module "react-vis" {
     searchPlaceholder?: string;
     searchFn?: Function;
   }
-  declare export var SearchableDiscreteColorLegend: SFC<SearchableDiscreteColorLegendProps>;
+  declare export var SearchableDiscreteColorLegend: StatelessFunctionalComponent<SearchableDiscreteColorLegendProps>;
   declare export type ContinuousColorLegendProps = {
     className?: string;
     height?: number;
@@ -938,7 +934,7 @@ declare module "react-vis" {
     startTitle: number | string;
     width?: number;
   }
-  declare export var ContinuousColorLegend: SFC<ContinuousColorLegendProps>;
+  declare export var ContinuousColorLegend: StatelessFunctionalComponent<ContinuousColorLegendProps>;
   declare export type ContinuousSizeLegendProps = {
     className?: string;
     circlesTotal?: number;
@@ -949,7 +945,7 @@ declare module "react-vis" {
     startTitle: number | string;
     width?: number;
   }
-  declare export var ContinuousSizeLegend: SFC<ContinuousSizeLegendProps>;
+  declare export var ContinuousSizeLegend: StatelessFunctionalComponent<ContinuousSizeLegendProps>;
   declare export type TreemapProps = {
     animation?:
       | string
