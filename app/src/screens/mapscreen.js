@@ -18,8 +18,9 @@ import DeckGL from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
+import {XYPlot, XAxis, YAxis, HorizontalGridLines, MarkSeries} from 'react-vis';
 
-import type {PickInfo} from "@deck.gl/core/lib/deck";
+import type {PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
@@ -49,6 +50,7 @@ type HoverInfo = PickInfo<Point>;
 
 function MapScreen(): React.Node {
   const [layers, setLayers] = useState(null);
+  const [graphData, setGraphData] = useState(null);
   const [hoverInfo, setHoverInfo] = useState<?HoverInfo>(null);
   const [minRssiToDisplay, setMinRssiToDisplay] = useState<?number>(0);
   const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<?number>(0);
@@ -112,7 +114,7 @@ function MapScreen(): React.Node {
             },
             getAngle: (d: Point) => 180 - d.bearing,
             billboard: false,
-            onHover: (info) => setHoverInfo(info),
+            onHover: info => setHoverInfo(info),
           });
 
           const highestSignalLayer = new PointCloudLayer({
@@ -236,15 +238,27 @@ function MapScreen(): React.Node {
             background: 'rgba(255,255,255,0.8)',
             display: 'inline-block',
           }}>
-          <Button variant="contained" color="primary" onClick={handleOpenClick}>Open Files</Button>
+          <Button variant="contained" color="primary" onClick={handleOpenClick}>
+            Open Files
+          </Button>
           <p />
           Highest RSSI: {minRssiToDisplay}dBm
           <p />
           Lowest RSSI: {maxRssiToDisplay}dBm
           <p />
           <ButtonGroup>
-            <Button variant={satelliteView ? undefined : "contained"} color="primary" onClick={showMap}>Map</Button>
-            <Button variant={satelliteView ? "contained" : undefined} color="primary" onClick={showSatellite}>Satellite</Button>
+            <Button
+              variant={satelliteView ? undefined : 'contained'}
+              color="primary"
+              onClick={showMap}>
+              Map
+            </Button>
+            <Button
+              variant={satelliteView ? 'contained' : undefined}
+              color="primary"
+              onClick={showSatellite}>
+              Satellite
+            </Button>
           </ButtonGroup>
           <p />
           Ignoring all points under {MIN_ELEVATION} meters
@@ -275,6 +289,13 @@ function MapScreen(): React.Node {
           </div>
         )}
       </DeckGL>
+      <XYPlot width={300} height={300}>
+        <MarkSeries
+          className="mark-series-example"
+          sizeRange={[5, 15]}
+          data={myData}
+        />
+      </XYPlot>
     </div>
   );
 }
