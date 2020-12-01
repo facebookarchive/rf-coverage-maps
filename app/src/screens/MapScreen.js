@@ -17,9 +17,12 @@ import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import CacheMapsDialog from '../components/CacheMapsDialog';
 import DeckGL from 'deck.gl';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
+import {makeStyles} from '@material-ui/core/styles';
 import {
   XYPlot,
   XAxis,
@@ -31,9 +34,6 @@ import {
 import '../../node_modules/react-vis/dist/style.css';
 
 import type {PickInfo} from '@deck.gl/core/lib/deck';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import {makeStyles} from '@material-ui/core/styles';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
@@ -280,11 +280,6 @@ function MapScreen(): React.Node {
         controller={true}
         layers={layers}
         getTooltip={(p: Point) => p.message}>
-        <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
-          <div style={{position: 'absolute', right: 0}}>
-            <NavigationControl showCompass={true} showZoom={false} />
-          </div>
-        </ReactMapGL>
         <div className={classes.root}>
           <AppBar position="static">
             <Toolbar>
