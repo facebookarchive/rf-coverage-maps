@@ -295,7 +295,7 @@ function MapScreen(): React.Node {
           </AppBar>
         </div>
         <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
-          <div style={{ position: 'absolute', right: 0 }}>
+          <div style={{position: 'absolute', right: 0}}>
             <NavigationControl showCompass={true} showZoom={false} />
           </div>
         </ReactMapGL>
@@ -311,7 +311,7 @@ function MapScreen(): React.Node {
           <p />
           <Typography>
             Highest RSSI: {minRssiToDisplay}dBm
-          <p />
+            <p />
             Lowest RSSI: {maxRssiToDisplay}dBm
           </Typography>
           <p />
@@ -331,18 +331,19 @@ function MapScreen(): React.Node {
           </ButtonGroup>
           <p />
           <Typography>
-          Ignoring all points under {MIN_ELEVATION} meters
-          <p />
-          Option+click to rotate map
-          <p />
-                    </Typography>
-
-          {graphData ? <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => setShowGraph(isShown => !isShown)}>
-            {showGraph ? 'Hide Graph' : 'Show Graph'}
-          </Button> : null}
+            Ignoring all points under {MIN_ELEVATION} meters
+            <p />
+            Option+click to rotate map
+            <p />
+          </Typography>
+          {graphData ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => setShowGraph(isShown => !isShown)}>
+              {showGraph ? 'Hide Graph' : 'Show Graph'}
+            </Button>
+          ) : null}
           {showGraph ? (
             <XYPlot width={500} height={500}>
               <VerticalGridLines />
@@ -363,8 +364,6 @@ function MapScreen(): React.Node {
             open={cacheMapDialogOpen}
             onClose={closeMapCacheDialog}
           />
-          <Button variant="outlined" color="secondary" onClick={openMapCacheDialog}>Download offline maps</Button>
-          <CacheMapsDialog open={cacheMapDialogOpen} onClose={closeMapCacheDialog} />
         </div>
         <input
           type="file"
@@ -385,9 +384,7 @@ function MapScreen(): React.Node {
               color: 'white',
               padding: 3,
             }}>
-            <Typography variant="body2">
-              {hoverInfo.object.message}
-            </Typography>
+            <Typography variant="body2">{hoverInfo.object.message}</Typography>
           </div>
         )}
       </DeckGL>
