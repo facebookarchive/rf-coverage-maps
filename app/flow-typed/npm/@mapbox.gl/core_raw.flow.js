@@ -229,7 +229,7 @@ declare module "@deck.gl/core/shaderlib/picking/picking" {
 }
 
 declare module "@deck.gl/core/shaderlib" {
-  import type { gouraudLighting, phongLighting } from "@luma.gl/core";
+  import typeof { gouraudLighting, phongLighting } from "@luma.gl/core";
 
   import typeof project from "@deck.gl/core/shaderlib/project/project";
 
