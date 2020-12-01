@@ -10,10 +10,12 @@
  */
 
 import * as React from 'react';
-import {useRef, useState} from 'react';
+import { useRef, useState } from 'react';
 
+import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import CacheMapsDialog from '../components/CacheMapsDialog';
 import DeckGL from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
@@ -29,12 +31,20 @@ import {
 import '../../node_modules/react-vis/dist/style.css';
 
 import type {PickInfo} from '@deck.gl/core/lib/deck';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import { COORDINATE_SYSTEM } from '@deck.gl/core';
+import { IconLayer, PointCloudLayer } from '@deck.gl/layers';
+import ReactMapGL, { NavigationControl } from 'react-map-gl';
+import { makeStyles } from '@material-ui/core/styles';
+
+import type { PickInfo } from "@deck.gl/core/lib/deck";
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
-  marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
+  marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
 };
 
 type ViewState = {
@@ -80,6 +90,7 @@ function MapScreen(): React.Node {
     'mapbox://styles/mapbox/satellite-v9',
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
+  const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewState>({
@@ -247,6 +258,25 @@ function MapScreen(): React.Node {
     setSatelliteView(true);
   }
 
+  function openMapCacheDialog() {
+    setCacheMapDialogOpen(true);
+  }
+
+  function closeMapCacheDialog(latitude: ?number, longitude: ?number) {
+    if (longitude && latitude) {
+      setView({
+        latitude: latitude,
+        longitude: longitude,
+        zoom: 17,
+        bearing: 0,
+        pitch: 45,
+    });
+    }
+    setCacheMapDialogOpen(false);
+  }
+
+  const classes = useStyles();
+
   return (
     <div>
       <DeckGL
@@ -255,10 +285,19 @@ function MapScreen(): React.Node {
         layers={layers}
         getTooltip={(p: Point) => p.message}>
         <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
-          <div style={{position: 'absolute', right: 0}}>
+          <div style={{ position: 'absolute', right: 0 }}>
             <NavigationControl showCompass={true} showZoom={false} />
           </div>
         </ReactMapGL>
+        <div className={classes.root}>
+          <AppBar position="static">
+            <Toolbar>
+              <Typography variant="h6" className={classes.title}>
+                3D Coverage Maps
+              </Typography>
+            </Toolbar>
+          </AppBar>
+        </div>
         <div
           style={{
             padding: 10,
@@ -301,11 +340,14 @@ function MapScreen(): React.Node {
               data={graphData}
             />
           </XYPlot>
+          <p />
+          <Button variant="outlined" color="secondary" onClick={openMapCacheDialog}>Download offline maps</Button>
+          <CacheMapsDialog open={cacheMapDialogOpen} onClose={closeMapCacheDialog} />
         </div>
         <input
           type="file"
           ref={fileInput}
-          style={{display: 'none'}}
+          style={{ display: 'none' }}
           onChange={handleFile}
           multiple="multiple"
         />
@@ -329,5 +371,14 @@ function MapScreen(): React.Node {
     </div>
   );
 }
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  title: {
+    flexGrow: 1,
+  },
+}));
 
 export default MapScreen;

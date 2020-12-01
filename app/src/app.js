@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import MapScreen from './screens/mapscreen';
+import MapScreen from './screens/MapScreen';
 import { createMuiTheme } from '@material-ui/core/styles';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 

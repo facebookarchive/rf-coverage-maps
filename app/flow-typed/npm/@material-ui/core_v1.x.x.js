@@ -2170,16 +2170,16 @@ declare module "@material-ui/core/AppBar/AppBar" {
     declare export type PaletteType = "light" | "dark";
 
     declare export type Color = {
-      50: string,
-      100: string,
-      200: string,
-      300: string,
-      400: string,
-      500: string,
-      600: string,
-      700: string,
-      800: string,
-      900: string,
+      '50': string,
+      '100': string,
+      '200': string,
+      '300': string,
+      '400': string,
+      '500': string,
+      '600': string,
+      '700': string,
+      '800': string,
+      '900': string,
       A100: string,
       A200: string,
       A400: string,
@@ -2536,6 +2536,7 @@ declare module "@material-ui/core/AppBar/AppBar" {
   }
 
   declare module "@material-ui/core/styles" {
+    import type {ComponentType, Node} from 'react';
     import type { Theme as MuiTheme } from "@material-ui/core/styles/createMuiTheme";
     import type { WithStyles as MuiWithStyles } from "@material-ui/core/styles/withStyles";
     import type { WithTheme as MuiWithTheme } from "@material-ui/core/styles/withTheme";
@@ -2544,15 +2545,34 @@ declare module "@material-ui/core/AppBar/AppBar" {
     declare export type WithStyles<T> = MuiWithStyles<T>;
     declare export type WithTheme = MuiWithTheme;
 
+    declare class ServerStyleSheets {
+      collect: Node => Node;
+    }
+
+    declare type Style<Props, Classes> = $Shape<{
+      [Classes]: {...} | (Props => {...}),
+    }>;
+
+    declare type StyleHookFn<_Props, Stl> = (
+      props?: _Props,
+    ) => $ObjMap<Stl, () => string>;
+
     declare module.exports: {
       MuiThemeProvider: $Exports<"@material-ui/core/styles/MuiThemeProvider">,
       withStyles: $Exports<"@material-ui/core/styles/withStyles">,
       withTheme: $Exports<"@material-ui/core/styles/withTheme">,
       createGenerateClassName: $Exports<
-        "@material-ui/core/styles/createGenerateClassName"
+      "@material-ui/core/styles/createGenerateClassName"
       >,
       createMuiTheme: $Exports<"@material-ui/core/styles/createMuiTheme">,
       jssPreset: $Exports<"@material-ui/core/styles/jssPreset">,
+      makeStyles: <Props, Stl: Style<Props, string>>(
+        Theme => Stl,
+      ) => StyleHookFn<Props, Stl>,
+      StylesProvider: ComponentType<{generateClassName?: () => string}>,
+      ServerStyleSheets: Class<ServerStyleSheets>,
+      createGenerateClassName: () => () => string,
+      useTheme: () => Theme,
     };
   }
 
