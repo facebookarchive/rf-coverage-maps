@@ -33,12 +33,7 @@ import '../../node_modules/react-vis/dist/style.css';
 import type {PickInfo} from '@deck.gl/core/lib/deck';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import { COORDINATE_SYSTEM } from '@deck.gl/core';
-import { IconLayer, PointCloudLayer } from '@deck.gl/layers';
-import ReactMapGL, { NavigationControl } from 'react-map-gl';
 import { makeStyles } from '@material-ui/core/styles';
-
-import type { PickInfo } from "@deck.gl/core/lib/deck";
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
