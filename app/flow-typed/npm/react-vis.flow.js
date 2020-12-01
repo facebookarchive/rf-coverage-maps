@@ -9,33 +9,29 @@ declare module "react-vis" {
   import type {
     Component,
     PureComponent,
-    ReactChild,
     Node,
     StatelessFunctionalComponent,
-    MouseEventHandler,
-    TouchEventHandler,
-    WheelEventHandler,
-    MouseEvent,
-    CSSProperties,
   } from "react";
+
+  declare type CSSProperties = $Shape<CSSStyleDeclaration>;
 
   declare export type AbstractSeriesPoint = {
     [key: string]: any;
   }
-  declare export type RVMouseEventHandler = MouseEventHandler<HTMLElement>;
-  declare export type RVTouchEventHandler = TouchEventHandler<HTMLElement>;
-  declare export type RVWheelEventHandler = WheelEventHandler<HTMLElement>;
+  declare export type RVMouseEventHandler = (SyntheticMouseEvent<HTMLElement>)=>void;
+  declare export type RVTouchEventHandler = (SyntheticTouchEvent<HTMLElement>)=>void;
+  declare export type RVWheelEventHandler = (SyntheticWheelEvent<HTMLElement>)=>void;
   declare export type RVItemEventHandler = (
     item: any,
     index: number,
-    event: MouseEvent<HTMLElement>
+    event: SyntheticMouseEvent<HTMLElement>
   ) => void;
   declare export type RVValueEventHandler<T: AbstractSeriesPoint> = (
     datapoint: T,
-    event: MouseEvent<HTMLElement>
+    event: SyntheticMouseEvent<HTMLElement>
   ) => void;
   declare export type RVNearestXData<T: AbstractSeriesPoint> = {
-    event: MouseEvent<HTMLElement>,
+    event: SyntheticMouseEvent<HTMLElement>,
     innerX: $PropertyType<T, "x">,
     index: number,
     ...
@@ -45,7 +41,7 @@ declare module "react-vis" {
     data: RVNearestXData<T>
   ) => void;
   declare export type RVNearestXYData<T: AbstractSeriesPoint> = {
-    event: MouseEvent<HTMLElement>,
+    event: SyntheticMouseEvent<HTMLElement>,
     innerX: $PropertyType<T, "x">,
     innerY: $PropertyType<T, "y">,
     index: number,
@@ -893,7 +889,7 @@ declare module "react-vis" {
           ...
         }
       | string
-      | ReactChild
+      | Node
     >;
     onItemClick?: RVMouseEventHandler;
     onItemMouseEnter?: RVItemEventHandler;
@@ -913,7 +909,7 @@ declare module "react-vis" {
           ...
         }
       | string
-      | ReactChild
+      | Node
     >;
     onItemClick?: RVMouseEventHandler;
     onItemMouseEnter?: RVItemEventHandler;
