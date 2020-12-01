@@ -236,7 +236,7 @@ function MapScreen(): React.Node {
         zoom: 17,
         bearing: 0,
         pitch: 45,
-    });
+      });
     }
     setCacheMapDialogOpen(false);
   }
@@ -250,11 +250,6 @@ function MapScreen(): React.Node {
         controller={true}
         layers={layers}
         getTooltip={(p: Point) => p.message}>
-        <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
-          <div style={{ position: 'absolute', right: 0 }}>
-            <NavigationControl showCompass={true} showZoom={false} />
-          </div>
-        </ReactMapGL>
         <div className={classes.root}>
           <AppBar position="static">
             <Toolbar>
@@ -264,6 +259,11 @@ function MapScreen(): React.Node {
             </Toolbar>
           </AppBar>
         </div>
+        <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
+          <div style={{ position: 'absolute', right: 0 }}>
+            <NavigationControl showCompass={true} showZoom={false} />
+          </div>
+        </ReactMapGL>
         <div
           style={{
             padding: 10,
@@ -272,19 +272,23 @@ function MapScreen(): React.Node {
           }}>
           <Button variant="contained" color="primary" onClick={handleOpenClick}>Open Files</Button>
           <p />
-          Highest RSSI: {minRssiToDisplay}dBm
+          <Typography>
+            Highest RSSI: {minRssiToDisplay}dBm
           <p />
-          Lowest RSSI: {maxRssiToDisplay}dBm
+            Lowest RSSI: {maxRssiToDisplay}dBm
+          </Typography>
           <p />
           <ButtonGroup>
             <Button variant={satelliteView ? undefined : "contained"} color="primary" onClick={showMap}>Map</Button>
             <Button variant={satelliteView ? "contained" : undefined} color="primary" onClick={showSatellite}>Satellite</Button>
           </ButtonGroup>
           <p />
+          <Typography>
           Ignoring all points under {MIN_ELEVATION} meters
           <p />
           Option+click to rotate map
           <p />
+          </Typography>
           <Button variant="outlined" color="secondary" onClick={openMapCacheDialog}>Download offline maps</Button>
           <CacheMapsDialog open={cacheMapDialogOpen} onClose={closeMapCacheDialog} />
         </div>
@@ -301,14 +305,15 @@ function MapScreen(): React.Node {
               position: 'absolute',
               zIndex: 1,
               pointerEvents: 'none',
-              left: hoverInfo.x,
-              top: hoverInfo.y,
+              right: 35,
+              top: 69,
               backgroundColor: 'black',
-              fontSize: '0.8em',
               color: 'white',
               padding: 3,
             }}>
-            {hoverInfo.object.message}
+            <Typography variant="body2">
+              {hoverInfo.object.message}
+            </Typography>
           </div>
         )}
       </DeckGL>
