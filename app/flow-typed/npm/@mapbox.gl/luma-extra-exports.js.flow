@@ -1,0 +1,138 @@
+/**
+ * @flow
+ */
+
+declare module "geometries" {
+    declare export { default as ConeGeometry } from "@luma.gl/engine/geometries/cone-geometry";
+
+    declare export { default as CubeGeometry } from "@luma.gl/engine/geometries/cube-geometry";
+
+    declare export { default as CylinderGeometry } from "@luma.gl/engine/geometries/cylinder-geometry";
+
+    declare export { default as IcoSphereGeometry } from "@luma.gl/engine/geometries/ico-sphere-geometry";
+
+    declare export { default as PlaneGeometry } from "@luma.gl/engine/geometries/plane-geometry";
+
+    declare export { default as SphereGeometry } from "@luma.gl/engine/geometries/sphere-geometry";
+
+    declare export { default as TruncatedConeGeometry } from "@luma.gl/engine/geometries/truncated-cone-geometry";
+  }
+
+  declare module "@luma.gl/experimental" {
+    declare export { default as Display } from "@luma.gl/experimental/webvr/display";
+
+    declare export { default as VRDisplay } from "@luma.gl/experimental/webvr/vr-display";
+
+    declare export { default as GLTFEnvironment } from "@luma.gl/experimental/gltf/gltf-environment";
+
+    declare export { default as createGLTFObjects } from "@luma.gl/experimental/gltf/create-gltf-objects";
+
+    declare export { default as ScenegraphNode } from "@luma.gl/experimental/scenegraph/nodes/scenegraph-node";
+
+    declare export { default as GroupNode } from "@luma.gl/experimental/scenegraph/nodes/group-node";
+
+    declare export { default as ModelNode } from "@luma.gl/experimental/scenegraph/nodes/model-node";
+
+    declare export {
+      buildHistopyramidBaseLevel,
+      getHistoPyramid,
+      histoPyramidGenerateIndices,
+    } from "@luma.gl/experimental/gpgpu/histopyramid/histopyramid";
+
+    declare export { default as GPUPointInPolygon } from "@luma.gl/experimental/gpgpu/point-in-polygon/gpu-point-in-polygon";
+  }
+
+  declare module "@luma.gl/shadertools/modules" {
+    declare export { default as fp32 } from "@luma.gl/shadertools/modules/fp32/fp32";
+
+    declare export {
+      default as fp64,
+      fp64arithmetic,
+    } from "@luma.gl/shadertools/modules/fp64/fp64";
+
+    declare export { default as project } from "@luma.gl/shadertools/modules/project/project";
+
+    declare export { default as lights } from "@luma.gl/shadertools/modules/lights/lights";
+
+    declare export { default as dirlight } from "@luma.gl/shadertools/modules/dirlight/dirlight";
+
+    declare export { default as picking } from "@luma.gl/shadertools/modules/picking/picking";
+
+    declare export {
+      gouraudLighting,
+      phongLighting,
+    } from "@luma.gl/shadertools/modules/phong-lighting/phong-lighting";
+
+    declare export { default as pbr } from "@luma.gl/shadertools/modules/pbr/pbr";
+
+    declare export { default as brightnessContrast } from "@luma.gl/shadertools/modules/adjust-filters/brightnesscontrast";
+
+    declare export { default as denoise } from "@luma.gl/shadertools/modules/adjust-filters/denoise";
+
+    declare export { default as hueSaturation } from "@luma.gl/shadertools/modules/adjust-filters/huesaturation";
+
+    declare export { default as noise } from "@luma.gl/shadertools/modules/adjust-filters/noise";
+
+    declare export { default as sepia } from "@luma.gl/shadertools/modules/adjust-filters/sepia";
+
+    declare export { default as vibrance } from "@luma.gl/shadertools/modules/adjust-filters/vibrance";
+
+    declare export { default as vignette } from "@luma.gl/shadertools/modules/adjust-filters/vignette";
+
+    declare export { default as tiltShift } from "@luma.gl/shadertools/modules/blur-filters/tiltshift";
+
+    declare export { default as triangleBlur } from "@luma.gl/shadertools/modules/blur-filters/triangleblur";
+
+    declare export { default as zoomBlur } from "@luma.gl/shadertools/modules/blur-filters/zoomblur";
+
+    declare export { default as colorHalftone } from "@luma.gl/shadertools/modules/fun-filters/colorhalftone";
+
+    declare export { default as dotScreen } from "@luma.gl/shadertools/modules/fun-filters/dotscreen";
+
+    declare export { default as edgeWork } from "@luma.gl/shadertools/modules/fun-filters/edgework";
+
+    declare export { default as hexagonalPixelate } from "@luma.gl/shadertools/modules/fun-filters/hexagonalpixelate";
+
+    declare export { default as ink } from "@luma.gl/shadertools/modules/fun-filters/ink";
+
+    declare export { default as bulgePinch } from "@luma.gl/shadertools/modules/warp-filters/bulgepinch";
+
+    declare export { default as swirl } from "@luma.gl/shadertools/modules/warp-filters/swirl";
+
+    declare export { default as fxaa } from "@luma.gl/shadertools/modules/fxaa/fxaa";
+
+    declare export { default as _transform } from "@luma.gl/shadertools/modules/transform/transform";
+  }
+
+
+declare module "@luma.gl/gltools" {
+  declare export { default as polyfillContext } from "@luma.gl/gltools/polyfill/polyfill-context";
+
+  declare export {
+    getParameters,
+    setParameters,
+    resetParameters,
+    withParameters,
+  } from "@luma.gl/gltools/state-tracker/unified-parameter-api";
+
+  declare export {
+    default as trackContextState,
+    pushContextState,
+    popContextState,
+  } from "@luma.gl/gltools/state-tracker/track-context-state";
+
+  declare export {
+    createGLContext,
+    resizeGLContext,
+    instrumentGLContext,
+    getContextDebugInfo,
+  } from "@luma.gl/gltools/context/context";
+
+  declare export {
+    log,
+    cssToDeviceRatio,
+    cssToDevicePixels,
+    isWebGL,
+    isWebGL2,
+  } from "@luma.gl/gltools/utils";
+}

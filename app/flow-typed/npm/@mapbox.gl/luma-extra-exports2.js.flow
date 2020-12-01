@@ -1,0 +1,115 @@
+/**
+ * @flow
+ */
+
+declare module "state-tracking" {
+    declare export {
+      default as trackContextState,
+      pushContextState,
+      popContextState,
+    } from "@luma.gl/webgl-state-tracker/state-tracking/track-context-state";
+
+    declare export { withParameters } from "@luma.gl/webgl-state-tracker/state-tracking/with-parameters";
+  }
+
+declare module "@luma.gl/webgl" {
+    declare export { lumaStats } from "@luma.gl/webgl/init";
+
+    declare export {
+      requestAnimationFrame,
+      cancelAnimationFrame,
+    } from "@luma.gl/webgl/webgl-utils/request-animation-frame";
+
+    declare export { cloneTextureFrom } from "@luma.gl/webgl/webgl-utils/texture-utils";
+
+    declare export {
+      getKeyValue,
+      getKey,
+    } from "@luma.gl/webgl/webgl-utils/constants-to-keys";
+
+    declare export {
+      getContextInfo,
+      getGLContextInfo,
+      getContextLimits,
+    } from "@luma.gl/webgl/features/limits";
+
+    declare export { FEATURES } from "@luma.gl/webgl/features/webgl-features-table";
+
+    declare export {
+      hasFeature,
+      hasFeatures,
+      getFeatures,
+    } from "@luma.gl/webgl/features/features";
+
+    declare export { default as canCompileGLGSExtension } from "@luma.gl/webgl/features/check-glsl-extension";
+
+    declare export { default as Accessor } from "@luma.gl/webgl/classes/accessor";
+
+    declare export { default as Buffer } from "@luma.gl/webgl/classes/buffer";
+
+    declare export {
+      Shader,
+      VertexShader,
+      FragmentShader,
+    } from "@luma.gl/webgl/classes/shader";
+
+    declare export { default as Program } from "@luma.gl/webgl/classes/program";
+
+    declare export { default as Framebuffer } from "@luma.gl/webgl/classes/framebuffer";
+
+    declare export { default as Renderbuffer } from "@luma.gl/webgl/classes/renderbuffer";
+
+    declare export { default as Texture2D } from "@luma.gl/webgl/classes/texture-2d";
+
+    declare export { default as TextureCube } from "@luma.gl/webgl/classes/texture-cube";
+
+    declare export { clear, clearBuffer } from "@luma.gl/webgl/classes/clear";
+
+    declare export {
+      readPixelsToArray,
+      readPixelsToBuffer,
+      copyToDataUrl,
+      copyToImage,
+      copyToTexture,
+      blit,
+    } from "@luma.gl/webgl/classes/copy-and-blit";
+
+    declare export { default as Query } from "@luma.gl/webgl/classes/query";
+
+    declare export { default as Texture3D } from "@luma.gl/webgl/classes/texture-3d";
+
+    declare export { default as TransformFeedback } from "@luma.gl/webgl/classes/transform-feedback";
+
+    declare export { default as VertexArrayObject } from "@luma.gl/webgl/classes/vertex-array-object";
+
+    declare export { default as VertexArray } from "@luma.gl/webgl/classes/vertex-array";
+
+    declare export { default as UniformBufferLayout } from "@luma.gl/webgl/classes/uniform-buffer-layout";
+
+    declare export {
+      setPathPrefix,
+      loadFile,
+      loadImage,
+    } from "@luma.gl/webgl/utils/load-file";
+
+    declare export { default as getShaderName } from "@luma.gl/webgl/glsl-utils/get-shader-name";
+
+    declare export { default as getShaderVersion } from "@luma.gl/webgl/glsl-utils/get-shader-version";
+
+    declare export { log } from "@luma.gl/gltools";
+
+    declare export { default as assert } from "@luma.gl/webgl/utils/assert";
+
+    declare export { uid, isObjectEmpty } from "@luma.gl/webgl/utils/utils";
+
+    declare export {
+      parseUniformName,
+      getUniformSetter,
+    } from "@luma.gl/webgl/classes/uniforms";
+
+    declare export { getDebugTableForUniforms } from "@luma.gl/webgl/debug/debug-uniforms";
+
+    declare export { getDebugTableForVertexArray } from "@luma.gl/webgl/debug/debug-vertex-array";
+
+    declare export { getDebugTableForProgramConfiguration } from "@luma.gl/webgl/debug/debug-program-configuration";
+  }
