@@ -243,8 +243,8 @@ function MapScreen(): React.Node {
           Lowest RSSI: {maxRssiToDisplay}dBm
           <p />
           <ButtonGroup>
-            <Button variant={satelliteView ? null : "contained"} color="primary" onClick={showMap}>Map</Button>
-            <Button variant={satelliteView ? "contained" : null} color="primary" onClick={showSatellite}>Satellite</Button>
+            <Button variant={satelliteView ? undefined : "contained"} color="primary" onClick={showMap}>Map</Button>
+            <Button variant={satelliteView ? "contained" : undefined} color="primary" onClick={showSatellite}>Satellite</Button>
           </ButtonGroup>
           <p />
           Ignoring all points under {MIN_ELEVATION} meters
