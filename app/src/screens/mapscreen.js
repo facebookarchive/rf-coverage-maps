@@ -15,6 +15,7 @@ import { useRef, useState } from 'react';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import CacheMapsDialog from '../components/CacheMapsDialog';
 import DeckGL from 'deck.gl';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -60,6 +61,7 @@ function MapScreen(): React.Node {
     'mapbox://styles/mapbox/satellite-v9',
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
+  const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewState>({
@@ -222,6 +224,35 @@ function MapScreen(): React.Node {
     setSatelliteView(true);
   }
 
+  function openMapCacheDialog() {
+    setCacheMapDialogOpen(true);
+  }
+
+  function closeMapCacheDialog(latitude: ?number, longitude: ?number) {
+    if (longitude && latitude) {
+      setView({
+        latitude: latitude,
+        longitude: longitude,
+        zoom: 17,
+        bearing: 0,
+        pitch: 45,
+    });
+    }
+    setCacheMapDialogOpen(false);
+  }
+
+
+/*
+  const [view, setView] = useState<ViewState>({
+    latitude: 37.483175,
+    longitude: -122.150084,
+    zoom: 17,
+    bearing: 0,
+    pitch: 45,
+  });
+*/
+
+
   const classes = useStyles();
 
   return (
@@ -265,6 +296,9 @@ function MapScreen(): React.Node {
           Ignoring all points under {MIN_ELEVATION} meters
           <p />
           Option+click to rotate map
+          <p />
+          <Button variant="outlined" color="secondary" onClick={openMapCacheDialog}>Download offline maps</Button>
+          <CacheMapsDialog open={cacheMapDialogOpen} onClose={closeMapCacheDialog} />
         </div>
         <input
           type="file"
