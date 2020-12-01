@@ -18,7 +18,15 @@ import DeckGL from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
-import {XYPlot, XAxis, YAxis, HorizontalGridLines, MarkSeries} from 'react-vis';
+import {
+  XYPlot,
+  XAxis,
+  YAxis,
+  HorizontalGridLines,
+  VerticalGridLines,
+  MarkSeries,
+} from 'react-vis';
+import '../../node_modules/react-vis/dist/style.css';
 
 import type {PickInfo} from '@deck.gl/core/lib/deck';
 
@@ -46,7 +54,21 @@ type Point = {
   message: string,
 };
 
+type XYPoint = {
+  x: number,
+  y: number,
+};
+
 type HoverInfo = PickInfo<Point>;
+
+function pointsToXY(points: Array<Point>): Array<XYPoint> {
+  return points.map(point => {
+    return {
+      x: point.height,
+      y: point.rssi,
+    };
+  });
+}
 
 function MapScreen(): React.Node {
   const [layers, setLayers] = useState(null);
@@ -82,7 +104,9 @@ function MapScreen(): React.Node {
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
     let newLayers: Array<Point> = [];
+    let xyPoints: Array<XYPoint> = [];
     setLayers(null);
+    setGraphData(null);
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -92,6 +116,8 @@ function MapScreen(): React.Node {
         if (content !== null && typeof content === 'string') {
           const lines = processFileData(content);
           newLayers = newLayers.concat(lines);
+          xyPoints = xyPoints.concat(pointsToXY(lines));
+          console.log(xyPoints);
           const rangeFactor = (-1 * 255) / (maxRssi - minRssi);
 
           const iconLayer = new IconLayer<Point>({
@@ -155,6 +181,7 @@ function MapScreen(): React.Node {
           setLayers([highestSignalLayer, iconLayer]);
           setMinRssiToDisplay(minRssi);
           setMaxRssiToDisplay(maxRssi);
+          setGraphData(xyPoints);
         }
       };
       reader.readAsText(file);
@@ -264,6 +291,16 @@ function MapScreen(): React.Node {
           Ignoring all points under {MIN_ELEVATION} meters
           <p />
           Option+click to rotate map
+          <XYPlot width={300} height={300}>
+            <VerticalGridLines />
+            <HorizontalGridLines />
+            <XAxis title="Height" />
+            <YAxis title="Path Loss" />
+            <MarkSeries
+              className="mark-series-example"
+              data={graphData}
+            />
+          </XYPlot>
         </div>
         <input
           type="file"
@@ -289,13 +326,6 @@ function MapScreen(): React.Node {
           </div>
         )}
       </DeckGL>
-      <XYPlot width={300} height={300}>
-        <MarkSeries
-          className="mark-series-example"
-          sizeRange={[5, 15]}
-          data={myData}
-        />
-      </XYPlot>
     </div>
   );
 }
