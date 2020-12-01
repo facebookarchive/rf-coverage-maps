@@ -18,10 +18,14 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 
-function CacheMapsDialog(props) {
+type Props = {
+    onClose: (?number, ?number) => void,
+    open: boolean,
+}
+
+function CacheMapsDialog(props: Props): React.Node {
     const [latitude, setLatitude] = useState<?number>(null);
     const [longitude, setLongitude] = useState<?number>(null);
     const [showError, setShowError] = useState<boolean>(false);
@@ -52,7 +56,7 @@ function CacheMapsDialog(props) {
                     id="latitude"
                     label="Latitude"
                     type="number"
-                    onChange={(event) => { 
+                    onChange={(event) => {
                         setShowError(false);
                         setLatitude(parseFloat(event.target.value))
                     }}
@@ -62,7 +66,7 @@ function CacheMapsDialog(props) {
                     id="longitude"
                     label="Longitude"
                     type="number"
-                    onChange={(event) => { 
+                    onChange={(event) => {
                         setShowError(false);
                         setLongitude(parseFloat(event.target.value))
                     }}
@@ -82,10 +86,5 @@ function CacheMapsDialog(props) {
         </Dialog>
     );
 }
-
-CacheMapsDialog.propTypes = {
-    onClose: PropTypes.func.isRequired,
-    open: PropTypes.bool.isRequired,
-};
 
 export default CacheMapsDialog;
