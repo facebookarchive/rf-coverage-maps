@@ -241,18 +241,6 @@ function MapScreen(): React.Node {
     setCacheMapDialogOpen(false);
   }
 
-
-/*
-  const [view, setView] = useState<ViewState>({
-    latitude: 37.483175,
-    longitude: -122.150084,
-    zoom: 17,
-    bearing: 0,
-    pitch: 45,
-  });
-*/
-
-
   const classes = useStyles();
 
   return (
