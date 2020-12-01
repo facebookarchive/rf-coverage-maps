@@ -12,6 +12,8 @@
 import * as React from 'react';
 import {useRef, useState} from 'react';
 
+import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import DeckGL from 'deck.gl';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
@@ -53,6 +55,7 @@ function App(): React.Node {
   const [mapStyle, setMapStyle] = useState<string>(
     'mapbox://styles/mapbox/satellite-v9',
   );
+  const [satelliteView, setSatelliteView] = useState<boolean>(true);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewState>({
@@ -207,10 +210,12 @@ function App(): React.Node {
 
   function showMap() {
     setMapStyle('mapbox://styles/mapbox/light-v9');
+    setSatelliteView(false);
   }
 
   function showSatellite() {
     setMapStyle('mapbox://styles/mapbox/satellite-v9');
+    setSatelliteView(true);
   }
 
   return (
@@ -231,14 +236,16 @@ function App(): React.Node {
             background: 'rgba(255,255,255,0.8)',
             display: 'inline-block',
           }}>
-          <button onClick={handleOpenClick}>Open Files</button>
+          <Button variant="contained" color="primary" onClick={handleOpenClick}>Open Files</Button>
           <p />
           Highest RSSI: {minRssiToDisplay}dBm
           <p />
           Lowest RSSI: {maxRssiToDisplay}dBm
           <p />
-          <button onClick={showMap}>Map</button>
-          <button onClick={showSatellite}>Satellite</button>
+          <ButtonGroup>
+            <Button variant={satelliteView ? null : "contained"} color="primary" onClick={showMap}>Map</Button>
+            <Button variant={satelliteView ? "contained" : null} color="primary" onClick={showSatellite}>Satellite</Button>
+          </ButtonGroup>
           <p />
           Ignoring all points under {MIN_ELEVATION} meters
           <p />
