@@ -37,6 +37,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Checkbox from '@material-ui/core/Checkbox';
+import LayerList from '../components/LayerList';
 
 import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
@@ -223,65 +224,6 @@ function MapScreen(): React.Node {
     );
   }
 
-  function buildLayerList() {
-    if (!Object.keys(customLayers).length) {
-      return null;
-    }
-    return (
-      <Accordion defaultExpanded={true}>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1a-content"
-          id="panel1a-header">
-          <Typography>Layers</Typography>
-        </AccordionSummary>
-        <List dense={true}>
-          {Object.keys(customLayers).map(name => {
-            const onClick = (shouldDelete: boolean) => () =>
-              setCustomLayers(prevLayers => {
-                const newLayer = {...prevLayers};
-                if (shouldDelete) {
-                  delete newLayer[name];
-                } else {
-                  const layer = newLayer[name];
-                  layer.visible = !layer.visible;
-                  newLayer[name] = layer;
-                }
-                return newLayer;
-              });
-            return (
-              <ListItem
-                key={name}
-                role={undefined}
-                dense
-                button
-                onClick={onClick(false)}>
-                <ListItemIcon>
-                  <Checkbox
-                    edge="start"
-                    checked={customLayers[name].visible}
-                    tabIndex={-1}
-                    disableRipple
-                    inputProps={{'aria-labelledby': name}}
-                  />
-                </ListItemIcon>
-                <ListItemText primary={name} />
-                <ListItemSecondaryAction>
-                  <IconButton
-                    edge="end"
-                    aria-label="delete"
-                    onClick={onClick(true)}>
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            );
-          })}
-        </List>
-      </Accordion>
-    );
-  }
-
   function showMap() {
     setMapStyle('mapbox://styles/mapbox/light-v9');
     setSatelliteView(false);
@@ -372,7 +314,10 @@ function MapScreen(): React.Node {
             Option+click to rotate map
             <p />
           </Typography>
-          {buildLayerList()}
+          <LayerList
+            setCustomLayers={setCustomLayers}
+            customLayers={customLayers}
+          />
           <p />
           <RssiHeightGraph customLayers={customLayers} />
           <p />
