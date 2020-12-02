@@ -25,8 +25,6 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import {useMemo, useRef, useState} from 'react';
-
 type Props = {
   setCustomLayers: ((LayerDict => LayerDict) | LayerDict) => void,
   customLayers: LayerDict,
