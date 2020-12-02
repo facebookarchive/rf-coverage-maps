@@ -22,15 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import {IconLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import {makeStyles} from '@material-ui/core/styles';
-import {
-  XYPlot,
-  XAxis,
-  YAxis,
-  HorizontalGridLines,
-  VerticalGridLines,
-  MarkSeries,
-} from 'react-vis';
-import '../../node_modules/react-vis/dist/style.css';
+import RssiHeightGraph from './RssiHeightGraph';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -79,7 +71,7 @@ type LayerInfo = {
   xydata: Array<XYPoint>,
   visible: boolean,
 };
-type LayerDict = {[name: string]: LayerInfo};
+export type LayerDict = {[name: string]: LayerInfo};
 
 function pointsToXY(points: Array<Point>): Array<XYPoint> {
   return points.map(point => {
@@ -100,7 +92,6 @@ function MapScreen(): React.Node {
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
-  const [showGraph, setShowGraph] = useState<boolean>(false);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewState>({
@@ -379,29 +370,7 @@ function MapScreen(): React.Node {
             <p />
           </Typography>
           {buildLayerList()}
-          {Object.keys(customLayers).length ? (
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => setShowGraph(isShown => !isShown)}>
-              {showGraph ? 'Hide Graph' : 'Show Graph'}
-            </Button>
-          ) : null}
-          {showGraph ? (
-            <XYPlot width={500} height={500}>
-              <VerticalGridLines />
-              <HorizontalGridLines />
-              <XAxis title="Drone Height (m, ALGL)" />
-              <YAxis title="Path Loss (dB)" />
-              {Object.keys(customLayers).map(name => (
-                <MarkSeries
-                  data={customLayers[name].xydata}
-                  opacity={customLayers[name].visible ? 1 : 0}
-                  size={1}
-                />
-              ))}
-            </XYPlot>
-          ) : null}
+          <RssiHeightGraph customLayers={customLayers} />
           <p />
           <Button
             variant="outlined"
