@@ -22,7 +22,7 @@ import Typography from '@material-ui/core/Typography';
 import {IconLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import {makeStyles} from '@material-ui/core/styles';
-import RssiHeightGraph from './RssiHeightGraph';
+import RssiHeightGraph from '../components/RssiHeightGraph';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
