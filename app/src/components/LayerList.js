@@ -9,7 +9,7 @@
  * @flow
  */
 
-import type {LayerDict} from './MapScreen';
+import type {LayerDict} from '../screens/MapScreen';
 
 import * as React from 'react';
 import Accordion from '@material-ui/core/Accordion';
@@ -28,11 +28,11 @@ import Checkbox from '@material-ui/core/Checkbox';
 import {useMemo, useRef, useState} from 'react';
 
 type Props = {
-  setCustomLayers: LayerDict => void,
+  setCustomLayers: ((LayerDict => LayerDict) | LayerDict) => void,
   customLayers: LayerDict,
-}
+};
 
-export default function LayerList(props: Props) {
+export default function LayerList(props: Props): React.Node {
   const {customLayers, setCustomLayers} = props;
   if (!Object.keys(customLayers).length) {
     return null;
