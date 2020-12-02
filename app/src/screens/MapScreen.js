@@ -379,7 +379,7 @@ function MapScreen(): React.Node {
             <p />
           </Typography>
           {buildLayerList()}
-          {customLayers ? (
+          {Object.keys(customLayers).length ? (
             <Button
               variant="outlined"
               color="primary"
