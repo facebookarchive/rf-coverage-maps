@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import {useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
@@ -19,8 +19,7 @@ import CacheMapsDialog from '../components/CacheMapsDialog';
 import DeckGL from 'deck.gl';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
+import {IconLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import {makeStyles} from '@material-ui/core/styles';
 import {
@@ -32,6 +31,15 @@ import {
   MarkSeries,
 } from 'react-vis';
 import '../../node_modules/react-vis/dist/style.css';
+
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import ListItemText from '@material-ui/core/ListItemText';
+import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
+import Checkbox from '@material-ui/core/Checkbox';
 
 import type {PickInfo} from '@deck.gl/core/lib/deck';
 
@@ -66,6 +74,13 @@ type XYPoint = {
 
 type HoverInfo = PickInfo<Point>;
 
+type LayerInfo = {
+  data: Array<Point>,
+  xydata: Array<XYPoint>,
+  visible: boolean,
+};
+type LayerDict = {[name: string]: LayerInfo};
+
 function pointsToXY(points: Array<Point>): Array<XYPoint> {
   return points.map(point => {
     return {
@@ -76,8 +91,7 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
 }
 
 function MapScreen(): React.Node {
-  const [layers, setLayers] = useState(null);
-  const [graphData, setGraphData] = useState<?Array<XYPoint>>(null);
+  const [customLayers, setCustomLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?HoverInfo>(null);
   const [minRssiToDisplay, setMinRssiToDisplay] = useState<?number>(0);
   const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<?number>(0);
@@ -97,12 +111,15 @@ function MapScreen(): React.Node {
     pitch: 45,
   });
 
+  const rangeFactor = useMemo(
+    () =>
+      (-1 * 255) /
+      (maxRssiToDisplay ?? maxRssi - (minRssiToDisplay ?? minRssi)),
+    [maxRssiToDisplay, minRssiToDisplay],
+  );
+
   let minRssi = -1000;
   let maxRssi = 0;
-  let bestLongitude;
-  let bestLatitude;
-  let bestElevation;
-  let bestBearing;
   const fileInput = useRef(null);
 
   function handleOpenClick() {
@@ -110,84 +127,32 @@ function MapScreen(): React.Node {
   }
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
-    let newLayers: Array<Point> = [];
-    let xyPoints: Array<XYPoint> = [];
-    setLayers(null);
-    setGraphData(null);
+    const newLayers: LayerDict = {};
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
+      const name = file.name;
       const reader = new FileReader();
       reader.onload = _e => {
         const content = reader.result;
         if (content !== null && typeof content === 'string') {
           const lines = processFileData(content);
-          newLayers = newLayers.concat(lines);
-          xyPoints = xyPoints.concat(pointsToXY(lines));
-          const rangeFactor = (-1 * 255) / (maxRssi - minRssi);
-
-          const iconLayer = new IconLayer<Point>({
-            id: 'icon-layer',
-            data: newLayers,
-            pickable: true,
-            // iconAtlas and iconMapping are required
-            iconAtlas: 'arrow.png',
-            iconMapping: ICON_MAPPING,
-            // getIcon: return a string
-            getIcon: (_d: Point) => 'marker',
-            sizeScale: 2,
-            getPosition: (d: Point) => [d.latitude, d.longitude, d.height],
-            getSize: (_d: Point) => 15,
-            getColor: (d: Point) => {
-              const red = parseInt(255 - (minRssi - d.rssi) * rangeFactor);
-              const blue = 255 - red;
-              const green = 255 - red - blue;
-              return [red, green, blue, 255];
-            },
-            getAngle: (d: Point) => 180 - d.bearing,
-            billboard: false,
-            onHover: info => setHoverInfo(info),
-          });
-
-          const highestSignalLayer = new PointCloudLayer({
-            id: 'highestSignal',
-            data: [
-              {
-                position: [bestLatitude, bestLongitude, bestElevation],
-                message:
-                  bestLatitude +
-                  ', ' +
-                  bestLongitude +
-                  ' ' +
-                  bestElevation +
-                  ' meters ' +
-                  minRssi +
-                  'dBm ' +
-                  bestBearing +
-                  '\u00b0',
-              },
-            ],
-            pickable: true,
-            coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-            coordinateOrigin: [newLayers[0].latitude, newLayers[0].longitude],
-            pointSize: 10,
+          const xyPoints = pointsToXY(lines);
+          newLayers[name] = {
+            data: lines,
             visible: true,
-            getPosition: (d: Point) => [d.latitude, d.longitude, d.height],
-            getColor: [255, 0, 0],
-            onHover: (info: HoverInfo) => setHoverInfo(info),
-          });
-
+            xydata: xyPoints,
+          };
+          setCustomLayers(newLayers);
           setView({
-            latitude: newLayers[0].longitude,
-            longitude: newLayers[0].latitude,
+            latitude: lines[0].longitude,
+            longitude: lines[0].latitude,
             zoom: 17,
             bearing: 0,
             pitch: 45,
           });
-          setLayers([highestSignalLayer, iconLayer]);
           setMinRssiToDisplay(minRssi);
           setMaxRssiToDisplay(maxRssi);
-          setGraphData(xyPoints);
         }
       };
       reader.readAsText(file);
@@ -215,10 +180,6 @@ function MapScreen(): React.Node {
         }
         if (typeof rssi === 'number' && rssi > minRssi) {
           minRssi = rssi;
-          bestLatitude = latitude;
-          bestLongitude = longitude;
-          bestElevation = height;
-          bestBearing = bearing;
         }
         lines.push({
           latitude,
@@ -241,6 +202,92 @@ function MapScreen(): React.Node {
       }
     }
     return lines;
+  }
+
+  function buildLayers() {
+    return Object.keys(customLayers).map(
+      name =>
+        new IconLayer<Point>({
+          id: name,
+          data: customLayers[name].data,
+          visible: customLayers[name].visible,
+          pickable: true,
+          // iconAtlas and iconMapping are required
+          iconAtlas: 'arrow.png',
+          iconMapping: ICON_MAPPING,
+          // getIcon: return a string
+          getIcon: (_d: Point) => 'marker',
+          sizeScale: 2,
+          getPosition: d => [d.latitude, d.longitude, d.height],
+          getSize: d => 15,
+          getColor: d => {
+            const red = parseInt(
+              255 - ((minRssiToDisplay ?? minRssi) - d.rssi) * rangeFactor,
+            );
+            const blue = 255 - red;
+            const green = 255 - red - blue;
+            return [red, green, blue, 255];
+          },
+          updateTriggers: {
+            // This tells deck.gl to recalculate color when `rangeFactor` changes
+            getColor: rangeFactor,
+          },
+          getAngle: (d: Point) => 180 - d.bearing,
+          billboard: false,
+          onHover: info => setHoverInfo(info),
+        }),
+    );
+  }
+
+  function buildLayerList() {
+    if (!customLayers) {
+      return null;
+    }
+    return (
+      <List dense={true}>
+        {Object.keys(customLayers).map(name => {
+          const onClick = (shouldDelete: boolean) => () =>
+            setCustomLayers(prevLayers => {
+              const newLayer = {...prevLayers};
+              if (shouldDelete) {
+                delete newLayer[name];
+              } else {
+                const layer = newLayer[name];
+                layer.visible = !layer.visible;
+                newLayer[name] = layer;
+              }
+              return newLayer;
+            });
+          return (
+            <ListItem
+              key={name}
+              role={undefined}
+              dense
+              button
+              onClick={onClick(false)}>
+              <ListItemIcon>
+                <Checkbox
+                  edge="start"
+                  checked={customLayers[name].visible}
+                  tabIndex={-1}
+                  disableRipple
+                  inputProps={{'aria-labelledby': name}}
+                />
+              </ListItemIcon>
+              <ListItemText primary={name} />
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={onClick(true)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          );
+        })}
+      </List>
+    );
   }
 
   function showMap() {
@@ -277,7 +324,7 @@ function MapScreen(): React.Node {
       <DeckGL
         initialViewState={view}
         controller={true}
-        layers={layers}
+        layers={buildLayers()}
         getTooltip={(p: Point) => p.message}>
         <div className={classes.root}>
           <AppBar position="static">
@@ -330,7 +377,8 @@ function MapScreen(): React.Node {
             Option+click to rotate map
             <p />
           </Typography>
-          {graphData ? (
+          {buildLayerList()}
+          {Object.keys(customLayers).length ? (
             <Button
               variant="outlined"
               color="primary"
@@ -344,7 +392,13 @@ function MapScreen(): React.Node {
               <HorizontalGridLines />
               <XAxis title="Drone Height (m, ALGL)" />
               <YAxis title="Path Loss (dB)" />
-              <MarkSeries data={graphData} size={1} />
+              {Object.keys(customLayers).map(name => (
+                <MarkSeries
+                  data={customLayers[name].xydata}
+                  opacity={customLayers[name].visible ? 1 : 0}
+                  size={1}
+                />
+              ))}
             </XYPlot>
           ) : null}
           <p />
