@@ -10,10 +10,11 @@
  */
 
 import * as React from 'react';
-import {useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {AppBar, Button} from '@material-ui/core';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -70,7 +71,8 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
 }
 
 function MapScreen(): React.Node {
-  const [customLayers, setCustomLayers] = useState<LayerDict>({});
+  const [unfilteredLayers, setUnfilteredLayers] = useState<LayerDict>({});
+  const [filteredLayers, setFilteredLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
   const [minRssiToDisplay, setMinRssiToDisplay] = useState<number>(-1000);
   const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<number>(0);
@@ -79,6 +81,8 @@ function MapScreen(): React.Node {
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
+  const [filterMinRssi, setFilterMinRssi] = useState('');
+  const [filterMaxRssi, setFilterMaxRssi] = useState('');
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -98,12 +102,34 @@ function MapScreen(): React.Node {
   let maxRssi = 0;
   const fileInput = useRef(null);
 
+  useEffect(() => {
+    if (!Object.keys(unfilteredLayers)) {
+      return;
+    }
+
+    const newLayers = {};
+    Object.keys(unfilteredLayers).forEach(key => {
+      newLayers[key] = {...unfilteredLayers[key]};
+      newLayers[key].data = newLayers[key].data.filter(point => {
+        if (filterMinRssi != '' && point.rssi < filterMinRssi) {
+          return false;
+        }
+        if (filterMaxRssi != '' && point.rssi > filterMaxRssi) {
+          return false;
+        }
+        return true;
+      });
+      newLayers[key].xydata = pointsToXY(newLayers[key].data);
+    });
+    setFilteredLayers(newLayers);
+  }, [unfilteredLayers, filterMinRssi, filterMaxRssi]);
+
   function handleOpenClick() {
     fileInput.current && fileInput.current.click && fileInput.current.click();
   }
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
-    const newLayers: LayerDict = {};
+    const allLayers = {};
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -114,12 +140,13 @@ function MapScreen(): React.Node {
         if (content !== null && typeof content === 'string') {
           const lines = processFileData(content);
           const xyPoints = pointsToXY(lines);
-          newLayers[name] = {
+          allLayers[name] = {
             data: lines,
             visible: true,
             xydata: xyPoints,
           };
-          setCustomLayers(newLayers);
+          // Use a new object so that react updates
+          setUnfilteredLayers({...allLayers});
           setView({
             latitude: lines[0].longitude,
             longitude: lines[0].latitude,
@@ -181,12 +208,12 @@ function MapScreen(): React.Node {
   }
 
   function buildLayers() {
-    return Object.keys(customLayers).map(
+    return Object.keys(filteredLayers).map(
       name =>
         new IconLayer<Point>({
           id: name,
-          data: customLayers[name].data,
-          visible: customLayers[name].visible,
+          data: filteredLayers[name].data,
+          visible: filteredLayers[name].visible,
           pickable: true,
           // iconAtlas and iconMapping are required
           // $FlowFixMe Images actually work fine.
@@ -307,11 +334,24 @@ function MapScreen(): React.Node {
             <p />
           </Typography>
           <LayerList
-            setCustomLayers={setCustomLayers}
-            customLayers={customLayers}
+            setCustomLayers={setFilteredLayers}
+            customLayers={filteredLayers}
           />
           <p />
-          <RssiHeightGraph customLayers={customLayers} />
+          <RssiHeightGraph customLayers={filteredLayers} />
+          <p />
+          <TextField
+            placeholder="Min RSSI"
+            type="number"
+            value={filterMinRssi}
+            onChange={({target}) => setFilterMinRssi(target.value)}
+          />
+          <TextField
+            placeholder="Max RSSI"
+            type="number"
+            value={filterMaxRssi}
+            onChange={({target}) => setFilterMaxRssi(target.value)}
+          />
           <p />
           <Button
             variant="outlined"
