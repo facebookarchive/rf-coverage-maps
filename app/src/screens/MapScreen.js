@@ -425,6 +425,9 @@ const useStyles = makeStyles(theme => ({
     padding: 10,
     background: 'rgba(255,255,255,0.8)',
     display: 'inline-block',
+    'max-height': '90%',
+    'overflow-y': 'auto',
+    'overflow-x': 'hidden',
   },
   divider: {
     margin: theme.spacing(2),
