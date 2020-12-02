@@ -38,10 +38,12 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Checkbox from '@material-ui/core/Checkbox';
 import LayerList from '../components/LayerList';
+import getArrow from '../components/ArrowElement';
 
 import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
+const Arrow = getArrow();
 
 const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
@@ -198,7 +200,8 @@ function MapScreen(): React.Node {
           visible: customLayers[name].visible,
           pickable: true,
           // iconAtlas and iconMapping are required
-          iconAtlas: 'arrow.png',
+          // $FlowFixMe Images actually work fine.
+          iconAtlas: Arrow,
           iconMapping: ICON_MAPPING,
           // getIcon: return a string
           getIcon: (_d: Point) => 'marker',
