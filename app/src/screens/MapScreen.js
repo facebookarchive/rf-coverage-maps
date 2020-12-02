@@ -38,7 +38,6 @@ import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 const Arrow = getArrow();
 
-const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
 };
@@ -86,6 +85,8 @@ function MapScreen(): React.Node {
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
   const [filterMinRssi, setFilterMinRssi] = useState('');
   const [filterMaxRssi, setFilterMaxRssi] = useState('');
+  const [filterMinHeight, setFilterMinHeight] = useState('10');
+  const [filterMaxHeight, setFilterMaxHeight] = useState('');
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -120,12 +121,24 @@ function MapScreen(): React.Node {
         if (filterMaxRssi !== '' && point.rssi > filterMaxRssi) {
           return false;
         }
+        if (filterMinHeight !== '' && point.height < filterMinHeight) {
+          return false;
+        }
+        if (filterMaxHeight !== '' && point.height > filterMaxHeight) {
+          return false;
+        }
         return true;
       });
       newLayers[key].xydata = pointsToXY(newLayers[key].data);
     });
     setFilteredLayers(newLayers);
-  }, [unfilteredLayers, filterMinRssi, filterMaxRssi]);
+  }, [
+    unfilteredLayers,
+    filterMinRssi,
+    filterMaxRssi,
+    filterMinHeight,
+    filterMaxHeight,
+  ]);
 
   function handleOpenClick() {
     fileInput.current && fileInput.current.click && fileInput.current.click();
@@ -180,32 +193,30 @@ function MapScreen(): React.Node {
       const rssi: number = parseFloat(data[4]);
       const bearing: number = parseFloat(data[5]);
 
-      if (height > MIN_ELEVATION) {
-        if (typeof rssi === 'number' && rssi < maxRssi) {
-          maxRssi = rssi;
-        }
-        if (typeof rssi === 'number' && rssi > minRssi) {
-          minRssi = rssi;
-        }
-        lines.push({
-          latitude,
-          longitude,
-          height,
-          rssi,
-          bearing,
-          message:
-            longitude +
-            ', ' +
-            latitude +
-            ' ' +
-            height +
-            ' meters ' +
-            rssi +
-            'dBm ' +
-            bearing +
-            '\u00b0',
-        });
+      if (typeof rssi === 'number' && rssi < maxRssi) {
+        maxRssi = rssi;
       }
+      if (typeof rssi === 'number' && rssi > minRssi) {
+        minRssi = rssi;
+      }
+      lines.push({
+        latitude,
+        longitude,
+        height,
+        rssi,
+        bearing,
+        message:
+          longitude +
+          ', ' +
+          latitude +
+          ' ' +
+          height +
+          ' meters ' +
+          rssi +
+          'dBm ' +
+          bearing +
+          '\u00b0',
+      });
     }
     return lines;
   }
@@ -284,6 +295,19 @@ function MapScreen(): React.Node {
           value={filterMaxRssi}
           onChange={({target}) => setFilterMaxRssi(target.value)}
         />
+        <br/>
+        <TextField
+          label="Min Elevation"
+          type="number"
+          value={filterMinHeight}
+          onChange={({target}) => setFilterMinHeight(target.value)}
+        />
+        <TextField
+          label="Max Elevation"
+          type="number"
+          value={filterMaxHeight}
+          onChange={({target}) => setFilterMaxHeight(target.value)}
+        />
       </Accordion>
     );
   }
@@ -358,12 +382,8 @@ function MapScreen(): React.Node {
             Lowest RSSI: {maxRssiToDisplay}dBm
           </Typography>
           <p />
-          <Typography>
-            Ignoring all points under {MIN_ELEVATION} meters
-            <p />
-            Option+click to rotate map
-            <p />
-          </Typography>
+          <Typography>Option+click to rotate map</Typography>
+          <p />
           <LayerList
             setCustomLayers={setFilteredLayers}
             customLayers={filteredLayers}
