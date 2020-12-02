@@ -84,9 +84,9 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
 
 function MapScreen(): React.Node {
   const [customLayers, setCustomLayers] = useState<LayerDict>({});
-  const [hoverInfo, setHoverInfo] = useState<?HoverInfo>(null);
-  const [minRssiToDisplay, setMinRssiToDisplay] = useState<?number>(0);
-  const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<?number>(0);
+  const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
+  const [minRssiToDisplay, setMinRssiToDisplay] = useState<number>(-1000);
+  const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<number>(0);
   const [mapStyle, setMapStyle] = useState<string>(
     'mapbox://styles/mapbox/satellite-v9',
   );
@@ -103,9 +103,7 @@ function MapScreen(): React.Node {
   });
 
   const rangeFactor = useMemo(
-    () =>
-      (-1 * 255) /
-      (maxRssiToDisplay ?? maxRssi - (minRssiToDisplay ?? minRssi)),
+    () => (-1 * 255) / (maxRssiToDisplay - minRssiToDisplay),
     [maxRssiToDisplay, minRssiToDisplay],
   );
 
@@ -214,7 +212,7 @@ function MapScreen(): React.Node {
           getColor: d => {
             debugger;
             const red = parseInt(
-              255 - ((minRssiToDisplay ?? minRssi) - d.rssi) * rangeFactor,
+              255 - (minRssiToDisplay - d.rssi) * rangeFactor,
             );
             const blue = 255 - red;
             const green = 255 - red - blue;
