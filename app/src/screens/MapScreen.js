@@ -33,21 +33,13 @@ import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import type {PickInfo} from '@deck.gl/core/lib/deck';
+import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
-};
-
-type ViewState = {
-  latitude: number,
-  longitude: number,
-  zoom: number,
-  bearing: number,
-  pitch: number,
 };
 
 type Point = {
@@ -63,8 +55,6 @@ type XYPoint = {
   x: number,
   y: number,
 };
-
-type HoverInfo = PickInfo<Point>;
 
 type LayerInfo = {
   data: Array<Point>,
@@ -94,7 +84,7 @@ function MapScreen(): React.Node {
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
 
   // Initialize view to MPK Campus
-  const [view, setView] = useState<ViewState>({
+  const [view, setView] = useState<ViewStateProps>({
     latitude: 37.483175,
     longitude: -122.150084,
     zoom: 17,
