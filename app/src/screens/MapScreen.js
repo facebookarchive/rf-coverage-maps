@@ -149,34 +149,6 @@ function MapScreen(): React.Node {
             onHover: info => setHoverInfo(info),
           });
 
-          const highestSignalLayer = new PointCloudLayer({
-            id: 'highestSignal',
-            data: [
-              {
-                position: [bestLatitude, bestLongitude, bestElevation],
-                message:
-                  bestLatitude +
-                  ', ' +
-                  bestLongitude +
-                  ' ' +
-                  bestElevation +
-                  ' meters ' +
-                  minRssi +
-                  'dBm ' +
-                  bestBearing +
-                  '\u00b0',
-              },
-            ],
-            pickable: true,
-            coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-            coordinateOrigin: [newLayers[0].latitude, newLayers[0].longitude],
-            pointSize: 10,
-            visible: true,
-            getPosition: (d: Point) => [d.latitude, d.longitude, d.height],
-            getColor: [255, 0, 0],
-            onHover: (info: HoverInfo) => setHoverInfo(info),
-          });
-
           setView({
             latitude: newLayers[0].longitude,
             longitude: newLayers[0].latitude,
@@ -184,7 +156,7 @@ function MapScreen(): React.Node {
             bearing: 0,
             pitch: 45,
           });
-          setLayers([highestSignalLayer, iconLayer]);
+          setLayers([iconLayer]);
           setMinRssiToDisplay(minRssi);
           setMaxRssiToDisplay(maxRssi);
           setGraphData(xyPoints);
