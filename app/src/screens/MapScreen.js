@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import {useRef, useState} from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
@@ -19,18 +19,27 @@ import CacheMapsDialog from '../components/CacheMapsDialog';
 import DeckGL from 'deck.gl';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import { COORDINATE_SYSTEM } from '@deck.gl/core';
-import { IconLayer, PointCloudLayer } from '@deck.gl/layers';
-import ReactMapGL, { NavigationControl } from 'react-map-gl';
-import { makeStyles } from '@material-ui/core/styles';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {IconLayer, PointCloudLayer} from '@deck.gl/layers';
+import ReactMapGL, {NavigationControl} from 'react-map-gl';
+import {makeStyles} from '@material-ui/core/styles';
+import {
+  XYPlot,
+  XAxis,
+  YAxis,
+  HorizontalGridLines,
+  VerticalGridLines,
+  MarkSeries,
+} from 'react-vis';
+import '../../node_modules/react-vis/dist/style.css';
 
-import type { PickInfo } from "@deck.gl/core/lib/deck";
+import type {PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
-  marker: { x: 0, y: 0, width: 128, height: 128, mask: true },
+  marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
 };
 
 type ViewState = {
@@ -50,10 +59,25 @@ type Point = {
   message: string,
 };
 
+type XYPoint = {
+  x: number,
+  y: number,
+};
+
 type HoverInfo = PickInfo<Point>;
+
+function pointsToXY(points: Array<Point>): Array<XYPoint> {
+  return points.map(point => {
+    return {
+      x: point.height,
+      y: point.rssi,
+    };
+  });
+}
 
 function MapScreen(): React.Node {
   const [layers, setLayers] = useState(null);
+  const [graphData, setGraphData] = useState<?Array<XYPoint>>(null);
   const [hoverInfo, setHoverInfo] = useState<?HoverInfo>(null);
   const [minRssiToDisplay, setMinRssiToDisplay] = useState<?number>(0);
   const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<?number>(0);
@@ -62,6 +86,7 @@ function MapScreen(): React.Node {
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
+  const [showGraph, setShowGraph] = useState<boolean>(false);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewState>({
@@ -86,7 +111,9 @@ function MapScreen(): React.Node {
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
     let newLayers: Array<Point> = [];
+    let xyPoints: Array<XYPoint> = [];
     setLayers(null);
+    setGraphData(null);
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -96,6 +123,7 @@ function MapScreen(): React.Node {
         if (content !== null && typeof content === 'string') {
           const lines = processFileData(content);
           newLayers = newLayers.concat(lines);
+          xyPoints = xyPoints.concat(pointsToXY(lines));
           const rangeFactor = (-1 * 255) / (maxRssi - minRssi);
 
           const iconLayer = new IconLayer<Point>({
@@ -118,7 +146,7 @@ function MapScreen(): React.Node {
             },
             getAngle: (d: Point) => 180 - d.bearing,
             billboard: false,
-            onHover: (info) => setHoverInfo(info),
+            onHover: info => setHoverInfo(info),
           });
 
           const highestSignalLayer = new PointCloudLayer({
@@ -159,6 +187,7 @@ function MapScreen(): React.Node {
           setLayers([highestSignalLayer, iconLayer]);
           setMinRssiToDisplay(minRssi);
           setMaxRssiToDisplay(maxRssi);
+          setGraphData(xyPoints);
         }
       };
       reader.readAsText(file);
@@ -260,7 +289,7 @@ function MapScreen(): React.Node {
           </AppBar>
         </div>
         <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
-          <div style={{ position: 'absolute', right: 0 }}>
+          <div style={{position: 'absolute', right: 0}}>
             <NavigationControl showCompass={true} showZoom={false} />
           </div>
         </ReactMapGL>
@@ -270,32 +299,70 @@ function MapScreen(): React.Node {
             background: 'rgba(255,255,255,0.8)',
             display: 'inline-block',
           }}>
-          <Button variant="contained" color="primary" onClick={handleOpenClick}>Open Files</Button>
+          <Button variant="contained" color="primary" onClick={handleOpenClick}>
+            Open Files
+          </Button>
           <p />
           <Typography>
             Highest RSSI: {minRssiToDisplay}dBm
-          <p />
+            <p />
             Lowest RSSI: {maxRssiToDisplay}dBm
           </Typography>
           <p />
           <ButtonGroup>
-            <Button variant={satelliteView ? undefined : "contained"} color="primary" onClick={showMap}>Map</Button>
-            <Button variant={satelliteView ? "contained" : undefined} color="primary" onClick={showSatellite}>Satellite</Button>
+            <Button
+              variant={satelliteView ? undefined : 'contained'}
+              color="primary"
+              onClick={showMap}>
+              Map
+            </Button>
+            <Button
+              variant={satelliteView ? 'contained' : undefined}
+              color="primary"
+              onClick={showSatellite}>
+              Satellite
+            </Button>
           </ButtonGroup>
           <p />
           <Typography>
-          Ignoring all points under {MIN_ELEVATION} meters
-          <p />
-          Option+click to rotate map
-          <p />
+            Ignoring all points under {MIN_ELEVATION} meters
+            <p />
+            Option+click to rotate map
+            <p />
           </Typography>
-          <Button variant="outlined" color="secondary" onClick={openMapCacheDialog}>Download offline maps</Button>
-          <CacheMapsDialog open={cacheMapDialogOpen} onClose={closeMapCacheDialog} />
+          {graphData ? (
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => setShowGraph(isShown => !isShown)}>
+              {showGraph ? 'Hide Graph' : 'Show Graph'}
+            </Button>
+          ) : null}
+          {showGraph ? (
+            <XYPlot width={500} height={500}>
+              <VerticalGridLines />
+              <HorizontalGridLines />
+              <XAxis title="Drone Height (m, ALGL)" />
+              <YAxis title="Path Loss (dB)" />
+              <MarkSeries data={graphData} size={1} />
+            </XYPlot>
+          ) : null}
+          <p />
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={openMapCacheDialog}>
+            Download offline maps
+          </Button>
+          <CacheMapsDialog
+            open={cacheMapDialogOpen}
+            onClose={closeMapCacheDialog}
+          />
         </div>
         <input
           type="file"
           ref={fileInput}
-          style={{ display: 'none' }}
+          style={{display: 'none'}}
           onChange={handleFile}
           multiple="multiple"
         />
@@ -311,9 +378,7 @@ function MapScreen(): React.Node {
               color: 'white',
               padding: 3,
             }}>
-            <Typography variant="body2">
-              {hoverInfo.object.message}
-            </Typography>
+            <Typography variant="body2">{hoverInfo.object.message}</Typography>
           </div>
         )}
       </DeckGL>
@@ -321,7 +386,7 @@ function MapScreen(): React.Node {
   );
 }
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
   },
