@@ -200,7 +200,6 @@ function MapScreen(): React.Node {
           getPosition: d => [d.latitude, d.longitude, d.height],
           getSize: d => 15,
           getColor: d => {
-            debugger;
             const red = parseInt(
               255 - (minRssiToDisplay - d.rssi) * rangeFactor,
             );
