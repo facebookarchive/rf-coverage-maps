@@ -12,9 +12,13 @@
 import * as React from 'react';
 import {useMemo, useRef, useState} from 'react';
 
-import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
+import {AppBar, Button} from '@material-ui/core';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Divider from '@material-ui/core/Divider';
+import Paper from '@material-ui/core/Paper';
+import Grid from '@material-ui/core/Grid';
 import CacheMapsDialog from '../components/CacheMapsDialog';
 import DeckGL from 'deck.gl';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -22,40 +26,25 @@ import Typography from '@material-ui/core/Typography';
 import {IconLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import {makeStyles} from '@material-ui/core/styles';
-import {
-  XYPlot,
-  XAxis,
-  YAxis,
-  HorizontalGridLines,
-  VerticalGridLines,
-  MarkSeries,
-} from 'react-vis';
-import '../../node_modules/react-vis/dist/style.css';
+import RssiHeightGraph from '../components/RssiHeightGraph';
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import type {PickInfo} from '@deck.gl/core/lib/deck';
+import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
-};
-
-type ViewState = {
-  latitude: number,
-  longitude: number,
-  zoom: number,
-  bearing: number,
-  pitch: number,
 };
 
 type Point = {
@@ -72,14 +61,12 @@ type XYPoint = {
   y: number,
 };
 
-type HoverInfo = PickInfo<Point>;
-
 type LayerInfo = {
   data: Array<Point>,
   xydata: Array<XYPoint>,
   visible: boolean,
 };
-type LayerDict = {[name: string]: LayerInfo};
+export type LayerDict = {[name: string]: LayerInfo};
 
 function pointsToXY(points: Array<Point>): Array<XYPoint> {
   return points.map(point => {
@@ -92,18 +79,17 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
 
 function MapScreen(): React.Node {
   const [customLayers, setCustomLayers] = useState<LayerDict>({});
-  const [hoverInfo, setHoverInfo] = useState<?HoverInfo>(null);
-  const [minRssiToDisplay, setMinRssiToDisplay] = useState<?number>(0);
-  const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<?number>(0);
+  const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
+  const [minRssiToDisplay, setMinRssiToDisplay] = useState<number>(-1000);
+  const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<number>(0);
   const [mapStyle, setMapStyle] = useState<string>(
     'mapbox://styles/mapbox/satellite-v9',
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
-  const [showGraph, setShowGraph] = useState<boolean>(false);
 
   // Initialize view to MPK Campus
-  const [view, setView] = useState<ViewState>({
+  const [view, setView] = useState<ViewStateProps>({
     latitude: 37.483175,
     longitude: -122.150084,
     zoom: 17,
@@ -112,9 +98,7 @@ function MapScreen(): React.Node {
   });
 
   const rangeFactor = useMemo(
-    () =>
-      (-1 * 255) /
-      (maxRssiToDisplay ?? maxRssi - (minRssiToDisplay ?? minRssi)),
+    () => (-1 * 255) / (maxRssiToDisplay - minRssiToDisplay),
     [maxRssiToDisplay, minRssiToDisplay],
   );
 
@@ -222,7 +206,7 @@ function MapScreen(): React.Node {
           getSize: d => 15,
           getColor: d => {
             const red = parseInt(
-              255 - ((minRssiToDisplay ?? minRssi) - d.rssi) * rangeFactor,
+              255 - (minRssiToDisplay - d.rssi) * rangeFactor,
             );
             const blue = 255 - red;
             const green = 255 - red - blue;
@@ -240,53 +224,61 @@ function MapScreen(): React.Node {
   }
 
   function buildLayerList() {
-    if (!customLayers) {
+    if (!Object.keys(customLayers).length) {
       return null;
     }
     return (
-      <List dense={true}>
-        {Object.keys(customLayers).map(name => {
-          const onClick = (shouldDelete: boolean) => () =>
-            setCustomLayers(prevLayers => {
-              const newLayer = {...prevLayers};
-              if (shouldDelete) {
-                delete newLayer[name];
-              } else {
-                const layer = newLayer[name];
-                layer.visible = !layer.visible;
-                newLayer[name] = layer;
-              }
-              return newLayer;
-            });
-          return (
-            <ListItem
-              key={name}
-              role={undefined}
-              dense
-              button
-              onClick={onClick(false)}>
-              <ListItemIcon>
-                <Checkbox
-                  edge="start"
-                  checked={customLayers[name].visible}
-                  tabIndex={-1}
-                  disableRipple
-                  inputProps={{'aria-labelledby': name}}
-                />
-              </ListItemIcon>
-              <ListItemText primary={name} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={onClick(true)}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })}
-      </List>
+      <Accordion defaultExpanded={true}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel1a-header">
+          <Typography>Layers</Typography>
+        </AccordionSummary>
+        <List dense={true}>
+          {Object.keys(customLayers).map(name => {
+            const onClick = (shouldDelete: boolean) => () =>
+              setCustomLayers(prevLayers => {
+                const newLayer = {...prevLayers};
+                if (shouldDelete) {
+                  delete newLayer[name];
+                } else {
+                  const layer = newLayer[name];
+                  layer.visible = !layer.visible;
+                  newLayer[name] = layer;
+                }
+                return newLayer;
+              });
+            return (
+              <ListItem
+                key={name}
+                role={undefined}
+                dense
+                button
+                onClick={onClick(false)}>
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start"
+                    checked={customLayers[name].visible}
+                    tabIndex={-1}
+                    disableRipple
+                    inputProps={{'aria-labelledby': name}}
+                  />
+                </ListItemIcon>
+                <ListItemText primary={name} />
+                <ListItemSecondaryAction>
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={onClick(true)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Accordion>
     );
   }
 
@@ -340,36 +332,39 @@ function MapScreen(): React.Node {
             <NavigationControl showCompass={true} showZoom={false} />
           </div>
         </ReactMapGL>
-        <div
-          style={{
-            padding: 10,
-            background: 'rgba(255,255,255,0.8)',
-            display: 'inline-block',
-          }}>
-          <Button variant="contained" color="primary" onClick={handleOpenClick}>
-            Open Files
-          </Button>
-          <p />
+        <Paper className={classes.sideBar}>
+          <Grid container spacing={3}>
+            <Grid item xs={5}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenClick}>
+                Open Files
+              </Button>
+            </Grid>
+            <Grid item xs={3}>
+              <ButtonGroup>
+                <Button
+                  variant={satelliteView ? undefined : 'contained'}
+                  color="primary"
+                  onClick={showMap}>
+                  Map
+                </Button>
+                <Button
+                  variant={satelliteView ? 'contained' : undefined}
+                  color="primary"
+                  onClick={showSatellite}>
+                  Satellite
+                </Button>
+              </ButtonGroup>
+            </Grid>
+          </Grid>
+          <Divider className={classes.divider} />
           <Typography>
             Highest RSSI: {minRssiToDisplay}dBm
             <p />
             Lowest RSSI: {maxRssiToDisplay}dBm
           </Typography>
-          <p />
-          <ButtonGroup>
-            <Button
-              variant={satelliteView ? undefined : 'contained'}
-              color="primary"
-              onClick={showMap}>
-              Map
-            </Button>
-            <Button
-              variant={satelliteView ? 'contained' : undefined}
-              color="primary"
-              onClick={showSatellite}>
-              Satellite
-            </Button>
-          </ButtonGroup>
           <p />
           <Typography>
             Ignoring all points under {MIN_ELEVATION} meters
@@ -378,29 +373,8 @@ function MapScreen(): React.Node {
             <p />
           </Typography>
           {buildLayerList()}
-          {Object.keys(customLayers).length ? (
-            <Button
-              variant="outlined"
-              color="primary"
-              onClick={() => setShowGraph(isShown => !isShown)}>
-              {showGraph ? 'Hide Graph' : 'Show Graph'}
-            </Button>
-          ) : null}
-          {showGraph ? (
-            <XYPlot width={500} height={500}>
-              <VerticalGridLines />
-              <HorizontalGridLines />
-              <XAxis title="Drone Height (m, ALGL)" />
-              <YAxis title="Path Loss (dB)" />
-              {Object.keys(customLayers).map(name => (
-                <MarkSeries
-                  data={customLayers[name].xydata}
-                  opacity={customLayers[name].visible ? 1 : 0}
-                  size={1}
-                />
-              ))}
-            </XYPlot>
-          ) : null}
+          <p />
+          <RssiHeightGraph customLayers={customLayers} />
           <p />
           <Button
             variant="outlined"
@@ -412,7 +386,7 @@ function MapScreen(): React.Node {
             open={cacheMapDialogOpen}
             onClose={closeMapCacheDialog}
           />
-        </div>
+        </Paper>
         <input
           type="file"
           ref={fileInput}
@@ -446,6 +420,17 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
+  },
+  sideBar: {
+    padding: 10,
+    background: 'rgba(255,255,255,0.8)',
+    display: 'inline-block',
+    'max-height': '90%',
+    'overflow-y': 'auto',
+    'overflow-x': 'hidden',
+  },
+  divider: {
+    margin: theme.spacing(2),
   },
 }));
 
