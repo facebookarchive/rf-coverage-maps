@@ -22,7 +22,7 @@ import {
 } from 'react-vis';
 import '../../node_modules/react-vis/dist/style.css';
 
-import type {LayerDict} from './MapScreen';
+import type {LayerDict} from '../screens/MapScreen';
 
 type Props = {customLayers: LayerDict};
 
