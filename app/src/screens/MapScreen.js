@@ -92,7 +92,6 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
 
 function MapScreen(): React.Node {
   const [customLayers, setCustomLayers] = useState<LayerDict>({});
-  const [graphData, setGraphData] = useState<?Array<XYPoint>>(null);
   const [hoverInfo, setHoverInfo] = useState<?HoverInfo>(null);
   const [minRssiToDisplay, setMinRssiToDisplay] = useState<?number>(0);
   const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<?number>(0);
@@ -129,7 +128,6 @@ function MapScreen(): React.Node {
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
     const newLayers: LayerDict = {};
-    setGraphData(null);
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -153,7 +151,6 @@ function MapScreen(): React.Node {
             bearing: 0,
             pitch: 45,
           });
-          setGraphData(xyPoints);
           setMinRssiToDisplay(minRssi);
           setMaxRssiToDisplay(maxRssi);
         }
@@ -382,7 +379,7 @@ function MapScreen(): React.Node {
             <p />
           </Typography>
           {buildLayerList()}
-          {graphData ? (
+          {customLayers ? (
             <Button
               variant="outlined"
               color="primary"
@@ -396,7 +393,13 @@ function MapScreen(): React.Node {
               <HorizontalGridLines />
               <XAxis title="Drone Height (m, ALGL)" />
               <YAxis title="Path Loss (dB)" />
-              <MarkSeries data={graphData} size={1} />
+              {Object.keys(customLayers).map(name => (
+                <MarkSeries
+                  data={customLayers[name].xydata}
+                  opacity={customLayers[name].visible ? 1 : 0}
+                  size={1}
+                />
+              ))}
             </XYPlot>
           ) : null}
           <p />
