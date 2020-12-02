@@ -10,12 +10,13 @@
  */
 
 import * as React from 'react';
-import {useMemo, useRef, useState} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {AppBar, Button} from '@material-ui/core';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
@@ -80,6 +81,7 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
   });
 }
 
+let allLayers: LayerDict = {};
 function MapScreen(): React.Node {
   const [customLayers, setCustomLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
@@ -90,6 +92,8 @@ function MapScreen(): React.Node {
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
+  const [filterMinRssi, setFilterMinRssi] = useState('');
+  const [filterMaxRssi, setFilterMaxRssi] = useState('');
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -109,12 +113,28 @@ function MapScreen(): React.Node {
   let maxRssi = 0;
   const fileInput = useRef(null);
 
+  useEffect(() => {
+    if (!Object.keys(allLayers)) {
+      return;
+    }
+
+    const newLayers = {};
+    Object.keys(allLayers).map(key => {
+      newLayers[key] = {...allLayers[key]};
+      newLayers[key].data = newLayers[key].data.filter(point => {
+        return point.rssi > filterMinRssi && point.rssi < filterMaxRssi;
+      });
+    });
+    console.log(allLayers, newLayers);
+    setCustomLayers(newLayers);
+  }, [filterMinRssi, filterMaxRssi]);
+
   function handleOpenClick() {
     fileInput.current && fileInput.current.click && fileInput.current.click();
   }
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
-    const newLayers: LayerDict = {};
+    allLayers = {};
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -125,12 +145,12 @@ function MapScreen(): React.Node {
         if (content !== null && typeof content === 'string') {
           const lines = processFileData(content);
           const xyPoints = pointsToXY(lines);
-          newLayers[name] = {
+          allLayers[name] = {
             data: lines,
             visible: true,
             xydata: xyPoints,
           };
-          setCustomLayers(newLayers);
+          setCustomLayers(allLayers);
           setView({
             latitude: lines[0].longitude,
             longitude: lines[0].latitude,
@@ -323,6 +343,19 @@ function MapScreen(): React.Node {
           />
           <p />
           <RssiHeightGraph customLayers={customLayers} />
+          <p />
+          <TextField
+            placeholder="Min RSSI"
+            type="number"
+            value={filterMinRssi}
+            onChange={({target}) => setFilterMinRssi(target.value)}
+          />
+          <TextField
+            placeholder="Max RSSI"
+            type="number"
+            value={filterMaxRssi}
+            onChange={({target}) => setFilterMaxRssi(target.value)}
+          />
           <p />
           <Button
             variant="outlined"
