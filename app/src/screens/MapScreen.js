@@ -10,7 +10,7 @@
  */
 
 import * as React from 'react';
-import {useRef, useState} from 'react';
+import {useMemo, useRef, useState} from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
@@ -112,6 +112,13 @@ function MapScreen(): React.Node {
     pitch: 45,
   });
 
+  const rangeFactor = useMemo(
+    () =>
+      (-1 * 255) /
+      (maxRssiToDisplay ?? maxRssi - (minRssiToDisplay ?? minRssi)),
+    [maxRssiToDisplay, minRssiToDisplay],
+  );
+
   let minRssi = -1000;
   let maxRssi = 0;
   const fileInput = useRef(null);
@@ -201,7 +208,6 @@ function MapScreen(): React.Node {
   }
 
   function buildLayers() {
-    const rangeFactor = (-1 * 255) / (maxRssi - minRssi);
     return Object.keys(customLayers).map(
       name =>
         new IconLayer<Point>({
@@ -215,13 +221,20 @@ function MapScreen(): React.Node {
           // getIcon: return a string
           getIcon: (_d: Point) => 'marker',
           sizeScale: 2,
-          getPosition: (d: Point) => [d.latitude, d.longitude, d.height],
-          getSize: 15,
-          getColor: (d: Point) => {
-            const red = parseInt(255 - (minRssi - d.rssi) * rangeFactor);
+          getPosition: d => [d.latitude, d.longitude, d.height],
+          getSize: d => 15,
+          getColor: d => {
+            debugger;
+            const red = parseInt(
+              255 - ((minRssiToDisplay ?? minRssi) - d.rssi) * rangeFactor,
+            );
             const blue = 255 - red;
             const green = 255 - red - blue;
             return [red, green, blue, 255];
+          },
+          updateTriggers: {
+            // This tells deck.gl to recalculate color when `rangeFactor` changes
+            getColor: rangeFactor,
           },
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
