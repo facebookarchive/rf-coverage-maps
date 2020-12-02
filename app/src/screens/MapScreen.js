@@ -13,7 +13,10 @@ import * as React from 'react';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {AppBar, Button} from '@material-ui/core';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
@@ -111,10 +114,10 @@ function MapScreen(): React.Node {
     Object.keys(unfilteredLayers).forEach(key => {
       newLayers[key] = {...unfilteredLayers[key]};
       newLayers[key].data = newLayers[key].data.filter(point => {
-        if (filterMinRssi != '' && point.rssi < filterMinRssi) {
+        if (filterMinRssi !== '' && point.rssi < filterMinRssi) {
           return false;
         }
-        if (filterMaxRssi != '' && point.rssi > filterMaxRssi) {
+        if (filterMaxRssi !== '' && point.rssi > filterMaxRssi) {
           return false;
         }
         return true;
@@ -257,6 +260,34 @@ function MapScreen(): React.Node {
     setCacheMapDialogOpen(true);
   }
 
+  function buildFilters() {
+    if (!Object.keys(filteredLayers).length) {
+      return null;
+    }
+    return (
+      <Accordion defaultExpanded={true}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel-filters">
+          <Typography>Filters</Typography>
+        </AccordionSummary>
+        <TextField
+          label="Min RSSI"
+          type="number"
+          value={filterMinRssi}
+          onChange={({target}) => setFilterMinRssi(target.value)}
+        />
+        <TextField
+          label="Max RSSI"
+          type="number"
+          value={filterMaxRssi}
+          onChange={({target}) => setFilterMaxRssi(target.value)}
+        />
+      </Accordion>
+    );
+  }
+
   function closeMapCacheDialog(latitude: ?number, longitude: ?number) {
     if (longitude && latitude) {
       setView({
@@ -340,18 +371,7 @@ function MapScreen(): React.Node {
           <p />
           <RssiHeightGraph customLayers={filteredLayers} />
           <p />
-          <TextField
-            placeholder="Min RSSI"
-            type="number"
-            value={filterMinRssi}
-            onChange={({target}) => setFilterMinRssi(target.value)}
-          />
-          <TextField
-            placeholder="Max RSSI"
-            type="number"
-            value={filterMaxRssi}
-            onChange={({target}) => setFilterMaxRssi(target.value)}
-          />
+          {buildFilters()}
           <p />
           <Button
             variant="outlined"
@@ -405,6 +425,9 @@ const useStyles = makeStyles(theme => ({
     'max-height': '90%',
     'overflow-y': 'auto',
     'overflow-x': 'hidden',
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+    },
   },
   divider: {
     margin: theme.spacing(2),
