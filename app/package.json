@@ -2,9 +2,12 @@
   "name": "rf-coverage-maps",
   "version": "0.1.0",
   "private": true,
+  "homepage": ".",
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "yarn run build:build build:zip",
+    "build:build": "react-scripts build",
+    "build:zip": "cd build && zip -r -X ../build.zip .",
     "test": "react-scripts test"
   },
   "dependencies": {
