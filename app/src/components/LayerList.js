@@ -41,7 +41,7 @@ export default function LayerList(props: Props): React.Node {
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="panel1a-content"
-        id="panel1a-header">
+        id="panel-layers">
         <Typography>Layers</Typography>
       </AccordionSummary>
       <List dense={true}>

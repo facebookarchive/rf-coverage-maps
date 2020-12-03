@@ -13,7 +13,10 @@ import * as React from 'react';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
 import {AppBar, Button} from '@material-ui/core';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
@@ -35,7 +38,6 @@ import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 const Arrow = getArrow();
 
-const MIN_ELEVATION = 10;
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
 };
@@ -58,6 +60,8 @@ type LayerInfo = {
   data: Array<Point>,
   xydata: Array<XYPoint>,
   visible: boolean,
+  minRssi: number,
+  maxRssi: number,
 };
 export type LayerDict = {[name: string]: LayerInfo};
 
@@ -74,8 +78,6 @@ function MapScreen(): React.Node {
   const [unfilteredLayers, setUnfilteredLayers] = useState<LayerDict>({});
   const [filteredLayers, setFilteredLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
-  const [minRssiToDisplay, setMinRssiToDisplay] = useState<number>(-1000);
-  const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<number>(0);
   const [mapStyle, setMapStyle] = useState<string>(
     'mapbox://styles/mapbox/satellite-v9',
   );
@@ -83,6 +85,8 @@ function MapScreen(): React.Node {
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
   const [filterMinRssi, setFilterMinRssi] = useState('');
   const [filterMaxRssi, setFilterMaxRssi] = useState('');
+  const [filterMinHeight, setFilterMinHeight] = useState('10');
+  const [filterMaxHeight, setFilterMaxHeight] = useState('');
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -93,13 +97,29 @@ function MapScreen(): React.Node {
     pitch: 45,
   });
 
+  const [maxRssiToDisplay, minRssiToDisplay] = useMemo<[number, number]>(
+    () =>
+      Object.keys(unfilteredLayers)
+        .filter(name => unfilteredLayers[name].visible)
+        .map<[number, number]>((name: string) => [
+          unfilteredLayers[name].maxRssi,
+          unfilteredLayers[name].minRssi,
+        ])
+        .reduce(
+          ([max, min], [max2, min2]) => [
+            max > max2 ? max : max2,
+            min < min2 ? min : min2,
+          ],
+          [-Infinity, Infinity],
+        ),
+    [unfilteredLayers],
+  );
+
   const rangeFactor = useMemo(
     () => (-1 * 255) / (maxRssiToDisplay - minRssiToDisplay),
     [maxRssiToDisplay, minRssiToDisplay],
   );
 
-  let minRssi = -1000;
-  let maxRssi = 0;
   const fileInput = useRef(null);
 
   useEffect(() => {
@@ -111,10 +131,16 @@ function MapScreen(): React.Node {
     Object.keys(unfilteredLayers).forEach(key => {
       newLayers[key] = {...unfilteredLayers[key]};
       newLayers[key].data = newLayers[key].data.filter(point => {
-        if (filterMinRssi != '' && point.rssi < filterMinRssi) {
+        if (filterMinRssi !== '' && point.rssi < filterMinRssi) {
           return false;
         }
-        if (filterMaxRssi != '' && point.rssi > filterMaxRssi) {
+        if (filterMaxRssi !== '' && point.rssi > filterMaxRssi) {
+          return false;
+        }
+        if (filterMinHeight !== '' && point.height < filterMinHeight) {
+          return false;
+        }
+        if (filterMaxHeight !== '' && point.height > filterMaxHeight) {
           return false;
         }
         return true;
@@ -122,14 +148,20 @@ function MapScreen(): React.Node {
       newLayers[key].xydata = pointsToXY(newLayers[key].data);
     });
     setFilteredLayers(newLayers);
-  }, [unfilteredLayers, filterMinRssi, filterMaxRssi]);
+  }, [
+    unfilteredLayers,
+    filterMinRssi,
+    filterMaxRssi,
+    filterMinHeight,
+    filterMaxHeight,
+  ]);
 
   function handleOpenClick() {
     fileInput.current && fileInput.current.click && fileInput.current.click();
   }
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
-    const allLayers = {};
+    const allLayers = {...unfilteredLayers};
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -138,12 +170,14 @@ function MapScreen(): React.Node {
       reader.onload = _e => {
         const content = reader.result;
         if (content !== null && typeof content === 'string') {
-          const lines = processFileData(content);
+          const [lines, maxRssi, minRssi] = processFileData(content);
           const xyPoints = pointsToXY(lines);
           allLayers[name] = {
             data: lines,
             visible: true,
             xydata: xyPoints,
+            maxRssi: maxRssi,
+            minRssi: minRssi,
           };
           // Use a new object so that react updates
           setUnfilteredLayers({...allLayers});
@@ -154,8 +188,6 @@ function MapScreen(): React.Node {
             bearing: 0,
             pitch: 45,
           });
-          setMinRssiToDisplay(minRssi);
-          setMaxRssiToDisplay(maxRssi);
         }
       };
       reader.readAsText(file);
@@ -167,6 +199,8 @@ function MapScreen(): React.Node {
     // latitude, longitude, altitude, height, rssi, bearing, status, time
     const allTextLines = allText.split(/\r\n|\n/);
     const lines: Array<Point> = [];
+    let maxRssi: number = NaN;
+    let minRssi: number = NaN;
 
     for (let i = 1; i < allTextLines.length; i++) {
       const data = allTextLines[i].split(',');
@@ -177,34 +211,22 @@ function MapScreen(): React.Node {
       const rssi: number = parseFloat(data[4]);
       const bearing: number = parseFloat(data[5]);
 
-      if (height > MIN_ELEVATION) {
-        if (typeof rssi === 'number' && rssi < maxRssi) {
-          maxRssi = rssi;
-        }
-        if (typeof rssi === 'number' && rssi > minRssi) {
-          minRssi = rssi;
-        }
-        lines.push({
-          latitude,
-          longitude,
-          height,
-          rssi,
-          bearing,
-          message:
-            longitude +
-            ', ' +
-            latitude +
-            ' ' +
-            height +
-            ' meters ' +
-            rssi +
-            'dBm ' +
-            bearing +
-            '\u00b0',
-        });
+      if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi < maxRssi)) {
+        maxRssi = rssi;
       }
+      if (typeof rssi === 'number' && (isNaN(minRssi) || rssi > minRssi)) {
+        minRssi = rssi;
+      }
+      lines.push({
+        latitude,
+        longitude,
+        height,
+        rssi,
+        bearing,
+        message: `${longitude}, ${latitude} ${height} meters ${rssi}dBm ${bearing}°`,
+      });
     }
-    return lines;
+    return [lines, maxRssi, minRssi];
   }
 
   function buildLayers() {
@@ -255,6 +277,47 @@ function MapScreen(): React.Node {
 
   function openMapCacheDialog() {
     setCacheMapDialogOpen(true);
+  }
+
+  function buildFilters() {
+    if (!Object.keys(filteredLayers).length) {
+      return null;
+    }
+    return (
+      <Accordion defaultExpanded={true}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel-filters">
+          <Typography>Filters</Typography>
+        </AccordionSummary>
+        <TextField
+          label="Min RSSI"
+          type="number"
+          value={filterMinRssi}
+          onChange={({target}) => setFilterMinRssi(target.value)}
+        />
+        <TextField
+          label="Max RSSI"
+          type="number"
+          value={filterMaxRssi}
+          onChange={({target}) => setFilterMaxRssi(target.value)}
+        />
+        <br />
+        <TextField
+          label="Min Elevation"
+          type="number"
+          value={filterMinHeight}
+          onChange={({target}) => setFilterMinHeight(target.value)}
+        />
+        <TextField
+          label="Max Elevation"
+          type="number"
+          value={filterMaxHeight}
+          onChange={({target}) => setFilterMaxHeight(target.value)}
+        />
+      </Accordion>
+    );
   }
 
   function closeMapCacheDialog(latitude: ?number, longitude: ?number) {
@@ -327,31 +390,16 @@ function MapScreen(): React.Node {
             Lowest RSSI: {maxRssiToDisplay}dBm
           </Typography>
           <p />
-          <Typography>
-            Ignoring all points under {MIN_ELEVATION} meters
-            <p />
-            Option+click to rotate map
-            <p />
-          </Typography>
+          <Typography>Option+click to rotate map</Typography>
+          <p />
           <LayerList
-            setCustomLayers={setFilteredLayers}
+            setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
           />
           <p />
           <RssiHeightGraph customLayers={filteredLayers} />
           <p />
-          <TextField
-            placeholder="Min RSSI"
-            type="number"
-            value={filterMinRssi}
-            onChange={({target}) => setFilterMinRssi(target.value)}
-          />
-          <TextField
-            placeholder="Max RSSI"
-            type="number"
-            value={filterMaxRssi}
-            onChange={({target}) => setFilterMaxRssi(target.value)}
-          />
+          {buildFilters()}
           <p />
           <Button
             variant="outlined"
@@ -405,6 +453,9 @@ const useStyles = makeStyles(theme => ({
     'max-height': '90%',
     'overflow-y': 'auto',
     'overflow-x': 'hidden',
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+    },
   },
   divider: {
     margin: theme.spacing(2),
