@@ -171,6 +171,9 @@ function MapScreen(): React.Node {
         const content = reader.result;
         if (content !== null && typeof content === 'string') {
           const [lines, maxRssi, minRssi] = processFileData(content);
+          if (lines.length === 0) {
+            return;
+          }
           const xyPoints = pointsToXY(lines);
           allLayers[name] = {
             data: lines,
@@ -204,12 +207,29 @@ function MapScreen(): React.Node {
 
     for (let i = 1; i < allTextLines.length; i++) {
       const data = allTextLines[i].split(',');
+      if (data.length < 6) {
+        continue;
+      }
       // Pull out the fields needed
       const longitude: number = parseFloat(data[0]);
       const latitude: number = parseFloat(data[1]);
       const height: number = parseFloat(data[3]);
       const rssi: number = parseFloat(data[4]);
       const bearing: number = parseFloat(data[5]);
+
+      if (
+        !Number.isFinite(longitude) ||
+        !Number.isFinite(latitude) ||
+        !Number.isFinite(height) ||
+        !Number.isFinite(rssi) ||
+        !Number.isFinite(bearing) ||
+        longitude < -180 ||
+        longitude > 180 ||
+        latitude < -90 ||
+        latitude > 90
+      ) {
+        continue;
+      }
 
       if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi < maxRssi)) {
         maxRssi = rssi;
