@@ -60,6 +60,8 @@ type LayerInfo = {
   data: Array<Point>,
   xydata: Array<XYPoint>,
   visible: boolean,
+  minRssi: number,
+  maxRssi: number,
 };
 export type LayerDict = {[name: string]: LayerInfo};
 
@@ -76,8 +78,6 @@ function MapScreen(): React.Node {
   const [unfilteredLayers, setUnfilteredLayers] = useState<LayerDict>({});
   const [filteredLayers, setFilteredLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
-  const [minRssiToDisplay, setMinRssiToDisplay] = useState<number>(-1000);
-  const [maxRssiToDisplay, setMaxRssiToDisplay] = useState<number>(0);
   const [mapStyle, setMapStyle] = useState<string>(
     'mapbox://styles/mapbox/satellite-v9',
   );
@@ -97,13 +97,29 @@ function MapScreen(): React.Node {
     pitch: 45,
   });
 
+  const [maxRssiToDisplay, minRssiToDisplay] = useMemo<[number, number]>(
+    () =>
+      Object.keys(unfilteredLayers)
+        .filter(name => unfilteredLayers[name].visible)
+        .map<[number, number]>((name: string) => [
+          unfilteredLayers[name].maxRssi,
+          unfilteredLayers[name].minRssi,
+        ])
+        .reduce(
+          ([max, min], [max2, min2]) => [
+            max > max2 ? max : max2,
+            min < min2 ? min : min2,
+          ],
+          [-Infinity, Infinity],
+        ),
+    [unfilteredLayers],
+  );
+
   const rangeFactor = useMemo(
     () => (-1 * 255) / (maxRssiToDisplay - minRssiToDisplay),
     [maxRssiToDisplay, minRssiToDisplay],
   );
 
-  let minRssi = -1000;
-  let maxRssi = 0;
   const fileInput = useRef(null);
 
   useEffect(() => {
@@ -145,7 +161,7 @@ function MapScreen(): React.Node {
   }
 
   function handleFile(e: SyntheticInputEvent<HTMLInputElement>) {
-    const allLayers = {};
+    const allLayers = {...unfilteredLayers};
     const files = e.target.files;
 
     Array.from(files).forEach((file: File) => {
@@ -154,12 +170,14 @@ function MapScreen(): React.Node {
       reader.onload = _e => {
         const content = reader.result;
         if (content !== null && typeof content === 'string') {
-          const lines = processFileData(content);
+          const [lines, maxRssi, minRssi] = processFileData(content);
           const xyPoints = pointsToXY(lines);
           allLayers[name] = {
             data: lines,
             visible: true,
             xydata: xyPoints,
+            maxRssi: maxRssi,
+            minRssi: minRssi,
           };
           // Use a new object so that react updates
           setUnfilteredLayers({...allLayers});
@@ -170,8 +188,6 @@ function MapScreen(): React.Node {
             bearing: 0,
             pitch: 45,
           });
-          setMinRssiToDisplay(minRssi);
-          setMaxRssiToDisplay(maxRssi);
         }
       };
       reader.readAsText(file);
@@ -183,6 +199,8 @@ function MapScreen(): React.Node {
     // latitude, longitude, altitude, height, rssi, bearing, status, time
     const allTextLines = allText.split(/\r\n|\n/);
     const lines: Array<Point> = [];
+    let maxRssi: number = NaN;
+    let minRssi: number = NaN;
 
     for (let i = 1; i < allTextLines.length; i++) {
       const data = allTextLines[i].split(',');
@@ -193,10 +211,10 @@ function MapScreen(): React.Node {
       const rssi: number = parseFloat(data[4]);
       const bearing: number = parseFloat(data[5]);
 
-      if (typeof rssi === 'number' && rssi < maxRssi) {
+      if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi < maxRssi)) {
         maxRssi = rssi;
       }
-      if (typeof rssi === 'number' && rssi > minRssi) {
+      if (typeof rssi === 'number' && (isNaN(minRssi) || rssi > minRssi)) {
         minRssi = rssi;
       }
       lines.push({
@@ -205,20 +223,10 @@ function MapScreen(): React.Node {
         height,
         rssi,
         bearing,
-        message:
-          longitude +
-          ', ' +
-          latitude +
-          ' ' +
-          height +
-          ' meters ' +
-          rssi +
-          'dBm ' +
-          bearing +
-          '\u00b0',
+        message: `${longitude}, ${latitude} ${height} meters ${rssi}dBm ${bearing}°`,
       });
     }
-    return lines;
+    return [lines, maxRssi, minRssi];
   }
 
   function buildLayers() {
@@ -295,7 +303,7 @@ function MapScreen(): React.Node {
           value={filterMaxRssi}
           onChange={({target}) => setFilterMaxRssi(target.value)}
         />
-        <br/>
+        <br />
         <TextField
           label="Min Elevation"
           type="number"
