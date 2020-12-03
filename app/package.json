@@ -9,7 +9,8 @@
     "start": "BROWSER=none react-scripts start",
     "build": "yarn run build:build build:zip",
     "build:build": "react-scripts build",
-    "build:zip": "cd build && zip -r -X ../build.zip .",    "test": "react-scripts test",
+    "build:zip": "cd build && zip -r -X ../build.zip .",   
+    "test": "react-scripts test",
     "dev": "concurrently \"yarn start\" \"wait-on http://localhost:3000 && electron .\"",
     "ebuild": "yarn build && node_modules/.bin/build"
   },
