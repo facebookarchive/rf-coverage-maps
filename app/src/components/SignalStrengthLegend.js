@@ -15,35 +15,50 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
+import {DEFAULT_RANGE, TURBO_HEATMAP, getRGBCustom} from '../utils/ColorUtils';
 
-type Bucket = {
-  color: number[],
-  maxValue: number,
-};
+import type {HeatmapType} from '../utils/ColorUtils';
 
 type Props = {
-  buckets: Array<Bucket>,
+  range: [number, number],
+  heatmap: HeatmapType,
 };
 
 function SignalStrengthLegend(props: Props): React.Node {
+  const [min, max] = props.range;
+  const range = max - min;
+  const bucketSize = range / (props.heatmap.length - 1);
+
+  const values = [...new Array(props.heatmap.length)].map(
+    (_, i) => max - bucketSize * i,
+  );
   return (
     <List dense={true}>
-      {props.buckets.map(bucket => (
-        <ListItem key={bucket.maxValue}>
+      {values.map(value => (
+        <ListItem key={value}>
           <ListItemAvatar>
             <Box
               style={{
                 height: 20,
                 width: 20,
-                backgroundColor: `rgba(${bucket.color.join(',')},1)`,
+                backgroundColor: `rgba(${getRGBCustom(
+                  value,
+                  min,
+                  max,
+                  props.heatmap,
+                ).join(',')})`,
               }}
             />
           </ListItemAvatar>
-          <ListItemText primary={'< ' + bucket.maxValue + 'dBm'} />
+          <ListItemText primary={'< ' + value + 'dBm'} />
         </ListItem>
       ))}
     </List>
   );
 }
+SignalStrengthLegend.defaultProps = {
+  range: DEFAULT_RANGE,
+  heatmap: TURBO_HEATMAP,
+};
 
 export default SignalStrengthLegend;

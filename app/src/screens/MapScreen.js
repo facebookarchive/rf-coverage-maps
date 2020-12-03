@@ -30,7 +30,7 @@ import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import {makeStyles} from '@material-ui/core/styles';
 import RssiHeightGraph from '../components/RssiHeightGraph';
 import SignalStrengthLegend from '../components/SignalStrengthLegend';
-import {getRGB, COLORS} from '../utils/ColorUtils';
+import {getRGBTurbo} from '../utils/ColorUtils';
 
 import LayerList from '../components/LayerList';
 import getArrow from '../components/ArrowElement';
@@ -116,50 +116,6 @@ function MapScreen(): React.Node {
         ),
     [unfilteredLayers],
   );
-
-
-  const signalBuckets = [
-    {
-      color: COLORS.heat10,
-      maxValue: -60,
-    },
-    {
-      color: COLORS.heat20,
-      maxValue: -65,
-    },
-    {
-      color: COLORS.heat30,
-      maxValue: -70,
-    },
-    {
-      color: COLORS.heat40,
-      maxValue: -75,
-    },
-    {
-      color: COLORS.heat50,
-      maxValue: -80,
-    },
-    {
-      color: COLORS.heat60,
-      maxValue: -85,
-    },
-    {
-      color: COLORS.heat70,
-      maxValue: -90,
-    },
-    {
-      color: COLORS.heat80,
-      maxValue: -95,
-    },
-    {
-      color: COLORS.heat90,
-      maxValue: -100,
-    },
-    {
-      color: COLORS.heat100,
-      maxValue: -105,
-    },
-  ];
 
   const fileInput = useRef(null);
 
@@ -307,26 +263,7 @@ function MapScreen(): React.Node {
           sizeScale: 2,
           getPosition: d => [d.latitude, d.longitude, d.height],
           getSize: d => 10,
-          getColor: d => {
-            if (d.rssi > -60) {
-              return getRGB(COLORS.heat10, COLORS.heat20, (60 + d.rssi) / 5);
-            } else if (d.rssi > -65) {
-              return getRGB(COLORS.heat20, COLORS.heat30, (65 + d.rssi) / 5);
-            } else if (d.rssi > -70) {
-              return getRGB(COLORS.heat30, COLORS.heat40, (70 + d.rssi) / 5);
-            } else if (d.rssi > -75) {
-              return getRGB(COLORS.heat40, COLORS.heat50, (75 + d.rssi) / 5);
-            } else if (d.rssi > -80) {
-              return getRGB(COLORS.heat50, COLORS.heat60, (80 + d.rssi) / 5);
-            } else if (d.rssi > -85) {
-              return getRGB(COLORS.heat60, COLORS.heat70, (85 + d.rssi) / 5);
-            } else if (d.rssi > -90) {
-              return getRGB(COLORS.heat70, COLORS.heat80, (90 + d.rssi) / 5);
-            } else if (d.rssi > -95) {
-              return getRGB(COLORS.heat80, COLORS.heat90, (95 + d.rssi) / 5);
-            }
-            return getRGB(COLORS.heat90, COLORS.heat100, (100 + d.rssi) / 5);
-          },
+          getColor: d => getRGBTurbo(d.rssi),
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
           onHover: info => setHoverInfo(info),
@@ -442,7 +379,7 @@ function MapScreen(): React.Node {
           </div>
           <div style={{position: 'absolute', right: 35}}>
             <Paper className={classes.rightSideBar}>
-              <SignalStrengthLegend buckets={signalBuckets} />
+              <SignalStrengthLegend />
             </Paper>
           </div>
         </ReactMapGL>
