@@ -19,6 +19,7 @@ import {
   HorizontalGridLines,
   VerticalGridLines,
   MarkSeries,
+  DiscreteColorLegend,
 } from 'react-vis';
 import '../../node_modules/react-vis/dist/style.css';
 
@@ -41,6 +42,10 @@ function RssiHeightGraph(props: Props): React.Node {
       ) : null}
       {showGraph ? (
         <XYPlot width={500} height={500}>
+          <DiscreteColorLegend
+            style={{top: 0, left: '12%', position: 'absolute'}}
+            items={Object.keys(customLayers)}
+          />
           <VerticalGridLines />
           <HorizontalGridLines />
           <XAxis title="Drone Height (m, ALGL)" />
