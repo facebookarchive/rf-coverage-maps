@@ -385,7 +385,7 @@ function MapScreen(): React.Node {
           <Typography>Option+click to rotate map</Typography>
           <p />
           <LayerList
-            setCustomLayers={setFilteredLayers}
+            setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
           />
           <p />
