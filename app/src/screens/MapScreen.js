@@ -29,6 +29,8 @@ import {IconLayer} from '@deck.gl/layers';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import {makeStyles} from '@material-ui/core/styles';
 import RssiHeightGraph from '../components/RssiHeightGraph';
+import SignalStrengthLegend from '../components/SignalStrengthLegend';
+import {getRGB, COLORS} from '../utils/ColorUtils';
 
 import LayerList from '../components/LayerList';
 import getArrow from '../components/ArrowElement';
@@ -115,10 +117,49 @@ function MapScreen(): React.Node {
     [unfilteredLayers],
   );
 
-  const rangeFactor = useMemo(
-    () => (-1 * 255) / (maxRssiToDisplay - minRssiToDisplay),
-    [maxRssiToDisplay, minRssiToDisplay],
-  );
+
+  const signalBuckets = [
+    {
+      color: COLORS.heat10,
+      maxValue: -60,
+    },
+    {
+      color: COLORS.heat20,
+      maxValue: -65,
+    },
+    {
+      color: COLORS.heat30,
+      maxValue: -70,
+    },
+    {
+      color: COLORS.heat40,
+      maxValue: -75,
+    },
+    {
+      color: COLORS.heat50,
+      maxValue: -80,
+    },
+    {
+      color: COLORS.heat60,
+      maxValue: -85,
+    },
+    {
+      color: COLORS.heat70,
+      maxValue: -90,
+    },
+    {
+      color: COLORS.heat80,
+      maxValue: -95,
+    },
+    {
+      color: COLORS.heat90,
+      maxValue: -100,
+    },
+    {
+      color: COLORS.heat100,
+      maxValue: -105,
+    },
+  ];
 
   const fileInput = useRef(null);
 
@@ -245,18 +286,26 @@ function MapScreen(): React.Node {
           getIcon: (_d: Point) => 'marker',
           sizeScale: 2,
           getPosition: d => [d.latitude, d.longitude, d.height],
-          getSize: d => 15,
+          getSize: d => 10,
           getColor: d => {
-            const red = parseInt(
-              255 - (minRssiToDisplay - d.rssi) * rangeFactor,
-            );
-            const blue = 255 - red;
-            const green = 255 - red - blue;
-            return [red, green, blue, 255];
-          },
-          updateTriggers: {
-            // This tells deck.gl to recalculate color when `rangeFactor` changes
-            getColor: rangeFactor,
+            if (d.rssi > -60) {
+              return getRGB(COLORS.heat10, COLORS.heat20, (60 + d.rssi) / 5);
+            } else if (d.rssi > -65) {
+              return getRGB(COLORS.heat20, COLORS.heat30, (65 + d.rssi) / 5);
+            } else if (d.rssi > -70) {
+              return getRGB(COLORS.heat30, COLORS.heat40, (70 + d.rssi) / 5);
+            } else if (d.rssi > -75) {
+              return getRGB(COLORS.heat40, COLORS.heat50, (75 + d.rssi) / 5);
+            } else if (d.rssi > -80) {
+              return getRGB(COLORS.heat50, COLORS.heat60, (80 + d.rssi) / 5);
+            } else if (d.rssi > -85) {
+              return getRGB(COLORS.heat60, COLORS.heat70, (85 + d.rssi) / 5);
+            } else if (d.rssi > -90) {
+              return getRGB(COLORS.heat70, COLORS.heat80, (90 + d.rssi) / 5);
+            } else if (d.rssi > -95) {
+              return getRGB(COLORS.heat80, COLORS.heat90, (95 + d.rssi) / 5);
+            }
+            return getRGB(COLORS.heat90, COLORS.heat100, (100 + d.rssi) / 5);
           },
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
@@ -348,6 +397,22 @@ function MapScreen(): React.Node {
               <Typography variant="h6" className={classes.title}>
                 3D Coverage Maps
               </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleOpenClick}>
+                Open Files
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={openMapCacheDialog}>
+                Download offline maps
+              </Button>
+              <CacheMapsDialog
+                open={cacheMapDialogOpen}
+                onClose={closeMapCacheDialog}
+              />
             </Toolbar>
           </AppBar>
         </div>
@@ -355,17 +420,14 @@ function MapScreen(): React.Node {
           <div style={{position: 'absolute', right: 0}}>
             <NavigationControl showCompass={true} showZoom={false} />
           </div>
+          <div style={{position: 'absolute', right: 35}}>
+            <Paper className={classes.rightSideBar}>
+              <SignalStrengthLegend buckets={signalBuckets} />
+            </Paper>
+          </div>
         </ReactMapGL>
         <Paper className={classes.sideBar}>
-          <Grid container spacing={3}>
-            <Grid item xs={5}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenClick}>
-                Open Files
-              </Button>
-            </Grid>
+          <Grid container spacing={3} alignItems="stretch" direction="column">
             <Grid item xs={3}>
               <ButtonGroup>
                 <Button
@@ -384,33 +446,19 @@ function MapScreen(): React.Node {
             </Grid>
           </Grid>
           <Divider className={classes.divider} />
-          <Typography>
-            Highest RSSI: {minRssiToDisplay}dBm
-            <p />
-            Lowest RSSI: {maxRssiToDisplay}dBm
-          </Typography>
+          <Typography>Highest RSSI: {minRssiToDisplay}dBm</Typography>
           <p />
-          <Typography>Option+click to rotate map</Typography>
+          <Typography>Lowest RSSI: {maxRssiToDisplay}dBm</Typography>
           <p />
+          <Typography variant="body2">Option+click to rotate map</Typography>
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
           />
           <p />
-          <RssiHeightGraph customLayers={filteredLayers} />
-          <p />
           {buildFilters()}
           <p />
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={openMapCacheDialog}>
-            Download offline maps
-          </Button>
-          <CacheMapsDialog
-            open={cacheMapDialogOpen}
-            onClose={closeMapCacheDialog}
-          />
+          <RssiHeightGraph customLayers={filteredLayers} />
         </Paper>
         <input
           type="file"
@@ -456,6 +504,14 @@ const useStyles = makeStyles(theme => ({
     '& .MuiTextField-root': {
       margin: theme.spacing(1),
     },
+  },
+  rightSideBar: {
+    padding: 0,
+    background: 'rgba(255,255,255,0.8)',
+    display: 'inline-block',
+    'max-height': '90%',
+    'overflow-y': 'auto',
+    'overflow-x': 'hidden',
   },
   divider: {
     margin: theme.spacing(2),
