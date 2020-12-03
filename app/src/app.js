@@ -11,14 +11,22 @@
 
 import * as React from 'react';
 import MapScreen from './screens/MapScreen';
-import { createMuiTheme } from '@material-ui/core/styles';
-import { MuiThemeProvider } from '@material-ui/core/styles';
+import {createMuiTheme} from '@material-ui/core/styles';
+import {MuiThemeProvider} from '@material-ui/core/styles';
 
 function App(): React.Node {
   const theme = createMuiTheme({
+    palette: {
+      secondary: {
+        light: '#e6e6e6',
+        main: '#BBBBBB',
+        dark: '#333333',
+        contrastText: '#f2f2f2',
+      },
+    },
     typography: {
-      fontFamily: ["Roboto", "Helvetica", "Arial", "sans-serif"]
-    }
+      fontFamily: ['Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+    },
   });
 
   return (
