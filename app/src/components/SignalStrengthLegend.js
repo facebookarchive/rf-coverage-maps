@@ -27,9 +27,11 @@ type Props = {
 function SignalStrengthLegend(props: Props): React.Node {
   const [min, max] = props.range;
   const range = max - min;
-  const bucketSize = range / (props.heatmap.length - 1);
+  const numBucketsRendered = props.heatmap.length;
+  // Subtract one to always have start and end of range
+  const bucketSize = range / (numBucketsRendered - 1);
 
-  const values = [...new Array(props.heatmap.length)].map(
+  const values = [...new Array(numBucketsRendered)].map(
     (_, i) => max - bucketSize * i,
   );
   return (

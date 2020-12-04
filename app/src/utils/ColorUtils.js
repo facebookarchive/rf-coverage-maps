@@ -52,8 +52,8 @@ export function getRGBCustom(
   const shiftedValue = value - min;
   const bucket = Math.floor(shiftedValue / bucketSize);
   // How far between the buckets is it, for interpolating between colors
-  const weight = shiftedValue - bucket * bucketSize;
-  const inverseWeight = 1 - weight;
+  const inverseWeight = (shiftedValue - bucket * bucketSize) / bucketSize;
+  const weight = 1 - inverseWeight;
 
   return [
     Math.round(
