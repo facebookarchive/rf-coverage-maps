@@ -230,10 +230,10 @@ function MapScreen(): React.Node {
         continue;
       }
 
-      if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi < maxRssi)) {
+      if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi > maxRssi)) {
         maxRssi = rssi;
       }
-      if (typeof rssi === 'number' && (isNaN(minRssi) || rssi > minRssi)) {
+      if (typeof rssi === 'number' && (isNaN(minRssi) || rssi < minRssi)) {
         minRssi = rssi;
       }
       lines.push({
