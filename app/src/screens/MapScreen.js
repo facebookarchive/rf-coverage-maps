@@ -22,7 +22,6 @@ import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import CacheMapsDialog from '../components/CacheMapsDialog';
-import MapboxTokenDialog from '../components/MapboxTokenDialog';
 import DeckGL from 'deck.gl';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -32,13 +31,13 @@ import {makeStyles} from '@material-ui/core/styles';
 import RssiHeightGraph from '../components/RssiHeightGraph';
 import SignalStrengthLegend from '../components/SignalStrengthLegend';
 import {getRGBTurbo} from '../utils/ColorUtils';
-import {useCookies} from 'react-cookie';
 
 import LayerList from '../components/LayerList';
 import getArrow from '../components/ArrowElement';
 
 import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
+const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 const Arrow = getArrow();
 
 const ICON_MAPPING = {
@@ -90,7 +89,6 @@ function MapScreen(): React.Node {
   const [filterMaxRssi, setFilterMaxRssi] = useState('');
   const [filterMinHeight, setFilterMinHeight] = useState('10');
   const [filterMaxHeight, setFilterMaxHeight] = useState('');
-  const [cookies, setCookie] = useCookies(['token']);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -230,10 +228,10 @@ function MapScreen(): React.Node {
         continue;
       }
 
-      if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi > maxRssi)) {
+      if (typeof rssi === 'number' && (isNaN(maxRssi) || rssi < maxRssi)) {
         maxRssi = rssi;
       }
-      if (typeof rssi === 'number' && (isNaN(minRssi) || rssi < minRssi)) {
+      if (typeof rssi === 'number' && (isNaN(minRssi) || rssi > minRssi)) {
         minRssi = rssi;
       }
       lines.push({
@@ -341,13 +339,8 @@ function MapScreen(): React.Node {
     setCacheMapDialogOpen(false);
   }
 
-  function closeMapboxTokenDialog(token: ?string) {
-    if (token) {
-      setCookie('token', token, {path: '/'});
-    }
-  }
-
   const classes = useStyles();
+
   return (
     <div>
       <DeckGL
@@ -380,20 +373,16 @@ function MapScreen(): React.Node {
             </Toolbar>
           </AppBar>
         </div>
-        {cookies.token ? (
-          <ReactMapGL mapboxApiAccessToken={cookies.token} mapStyle={mapStyle}>
-            <div style={{position: 'absolute', right: 0}}>
-              <NavigationControl showCompass={true} showZoom={false} />
-            </div>
-            <div style={{position: 'absolute', right: 35}}>
-              <Paper className={classes.rightSideBar}>
-                <SignalStrengthLegend />
-              </Paper>
-            </div>
-          </ReactMapGL>
-        ) : (
-          <MapboxTokenDialog onClose={closeMapboxTokenDialog} />
-        )}
+        <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
+          <div style={{position: 'absolute', right: 0}}>
+            <NavigationControl showCompass={true} showZoom={false} />
+          </div>
+          <div style={{position: 'absolute', right: 35}}>
+            <Paper className={classes.rightSideBar}>
+              <SignalStrengthLegend />
+            </Paper>
+          </div>
+        </ReactMapGL>
         <Paper className={classes.sideBar}>
           <Grid container spacing={3} alignItems="stretch" direction="column">
             <Grid item xs={3}>
@@ -419,6 +408,7 @@ function MapScreen(): React.Node {
           <Typography>Lowest RSSI: {maxRssiToDisplay}dBm</Typography>
           <p />
           <Typography variant="body2">Option+click to rotate map</Typography>
+          <p />
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}

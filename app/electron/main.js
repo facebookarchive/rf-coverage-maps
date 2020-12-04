@@ -22,7 +22,7 @@ function createWindow() {
     show: false,
   });
   const startURL = isDev
-    ? 'http://localhost:3000/'
+    ? 'http://localhost:3000/?access_token=pk.eyJ1IjoiZmFubnlraGlldSIsImEiOiJja2k0eWRqcWcwNzI4MnBxbzM5bGllYjZ2In0.VjNz3ZjqXvByKLYAqqIgTg'
     : `file://${path.join(__dirname, '../public/index.html')}`;
 
   mainWindow.loadURL(startURL);
