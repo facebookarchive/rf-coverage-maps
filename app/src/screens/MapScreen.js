@@ -249,6 +249,9 @@ function MapScreen(): React.Node {
   }
 
   function buildLayers() {
+    const MAX_ARROW_SIZE = 20;
+    const BEST_RSSI = -50;
+    const WORST_RSSI = -110;
     return Object.keys(filteredLayers).map(
       name =>
         new IconLayer<Point>({
@@ -262,9 +265,12 @@ function MapScreen(): React.Node {
           iconMapping: ICON_MAPPING,
           // getIcon: return a string
           getIcon: (_d: Point) => 'marker',
-          sizeScale: 2,
+          sizeScale: 1,
           getPosition: d => [d.latitude, d.longitude, d.height],
-          getSize: d => 10,
+          getSize: d => {
+            // Make arrow size proportional to RSSI between -50 and -110
+            return MAX_ARROW_SIZE * (1 - (Math.abs(d.rssi - BEST_RSSI)) / (BEST_RSSI - WORST_RSSI));
+          },
           getColor: d => getRGBTurbo(d.rssi),
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
@@ -419,6 +425,7 @@ function MapScreen(): React.Node {
           <Typography>Lowest RSSI: {maxRssiToDisplay}dBm</Typography>
           <p />
           <Typography variant="body2">Option+click to rotate map</Typography>
+          <p />
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
