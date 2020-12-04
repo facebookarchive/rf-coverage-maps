@@ -60,7 +60,7 @@ function MapboxTokenDialog(props: Props): React.Node {
           autoFocus
           id="token"
           label="Token"
-          type="string"
+          type="password"
           onChange={event => {
             setToken(event.target.value);
           }}          
