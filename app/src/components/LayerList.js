@@ -32,9 +32,6 @@ type Props = {
 
 export default function LayerList(props: Props): React.Node {
   const {customLayers, setCustomLayers} = props;
-  if (!Object.keys(customLayers).length) {
-    return null;
-  }
 
   return (
     <Accordion>

@@ -290,9 +290,6 @@ function MapScreen(): React.Node {
   }
 
   function buildFilters() {
-    if (!Object.keys(filteredLayers).length) {
-      return null;
-    }
     return (
       <Accordion>
         <AccordionSummary

@@ -33,9 +33,7 @@ type Props = {customLayers: LayerDict};
 function RssiHeightGraph(props: Props): React.Node {
   const [showGraph, setShowGraph] = useState<boolean>(false);
   const customLayers = props.customLayers;
-  if (!Object.keys(customLayers).length) {
-    return null;
-  }
+
   return (
     <>
       <Accordion
