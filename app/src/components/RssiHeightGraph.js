@@ -33,6 +33,7 @@ type Props = {customLayers: LayerDict};
 function RssiHeightGraph(props: Props): React.Node {
   const [showGraph, setShowGraph] = useState<boolean>(false);
   const customLayers = props.customLayers;
+  const noData = Object.keys(customLayers).length === 0;
 
   return (
     <>
@@ -45,7 +46,12 @@ function RssiHeightGraph(props: Props): React.Node {
           id="panel-filters">
           <Typography>RSSI/Height Graph</Typography>
         </AccordionSummary>
-        {showGraph ? (
+        {noData ? (
+          <Typography style={{padding: 16}}>
+            No layers! Add some files to get started!
+          </Typography>
+        ) : null}
+        {showGraph && !noData ? (
           <XYPlot width={500} height={500}>
             <DiscreteColorLegend
               style={{top: 0, left: '12%', position: 'absolute'}}
