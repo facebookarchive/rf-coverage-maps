@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "BROWSER=none react-scripts start",
-    "build": "yarn run build:build build:zip",
+    "build": "yarn run build:build && yarn run build:zip",
     "build:build": "react-scripts build",
     "build:zip": "cd build && zip -r -X ../build.zip .",
     "test": "react-scripts test",
