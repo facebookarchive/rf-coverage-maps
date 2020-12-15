@@ -15,13 +15,11 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {AppBar, Button} from '@material-ui/core';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import CacheMapsDialog from '../components/CacheMapsDialog';
@@ -277,14 +275,14 @@ function MapScreen(): React.Node {
     );
   }
 
-  function showMap() {
-    setMapStyle('mapbox://styles/mapbox/light-v9');
-    setSatelliteView(false);
-  }
-
-  function showSatellite() {
-    setMapStyle('mapbox://styles/mapbox/satellite-v9');
-    setSatelliteView(true);
+  function swapSatteliteView() {
+    if (satelliteView) {
+      setMapStyle('mapbox://styles/mapbox/light-v9');
+      setSatelliteView(false);
+    } else {
+      setMapStyle('mapbox://styles/mapbox/satellite-v9');
+      setSatelliteView(true);
+    }
   }
 
   function openMapCacheDialog() {
@@ -296,7 +294,7 @@ function MapScreen(): React.Node {
       return null;
     }
     return (
-      <Accordion defaultExpanded={true}>
+      <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
@@ -333,22 +331,28 @@ function MapScreen(): React.Node {
   }
 
   function buildUISettings() {
-    if (!Object.keys(filteredLayers).length) {
-      return null;
-    }
     return (
-      <Accordion defaultExpanded={false}>
+      <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
           id="panel-filters">
           <Typography>UI Settings</Typography>
         </AccordionSummary>
-        <FormGroup row className={classes.formGroup}>
+        <FormGroup className={classes.formGroup}>
           <FormControlLabel
             control={
               <Switch
-                name={'Arrow Glow'}
+                onChange={swapSatteliteView}
+                checked={satelliteView}
+                inputProps={{'aria-labelledby': 'arrow-glow'}}
+              />
+            }
+            label="Satellite View"
+          />
+          <FormControlLabel
+            control={
+              <Switch
                 onChange={() => setArrowGlow(prev => !prev)}
                 checked={arrowGlow}
                 inputProps={{'aria-labelledby': 'arrow-glow'}}
@@ -419,21 +423,6 @@ function MapScreen(): React.Node {
           </div>
         </ReactMapGL>
         <Paper className={classes.sideBar}>
-          <ButtonGroup>
-            <Button
-              variant={satelliteView ? undefined : 'contained'}
-              color="primary"
-              onClick={showMap}>
-              Map
-            </Button>
-            <Button
-              variant={satelliteView ? 'contained' : undefined}
-              color="primary"
-              onClick={showSatellite}>
-              Satellite
-            </Button>
-          </ButtonGroup>
-          <Divider className={classes.divider} />
           <Typography variant="body2">Option+click to rotate map</Typography>
           <p />
           {isFinite(minRssiToDisplay) || isFinite(maxRssiToDisplay) ? (
@@ -516,9 +505,6 @@ const useStyles = makeStyles(theme => ({
     'max-height': '90%',
     'overflow-y': 'auto',
     'overflow-x': 'hidden',
-  },
-  divider: {
-    margin: theme.spacing(2),
   },
 }));
 

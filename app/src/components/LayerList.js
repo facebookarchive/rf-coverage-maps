@@ -37,7 +37,7 @@ export default function LayerList(props: Props): React.Node {
   }
 
   return (
-    <Accordion defaultExpanded={true}>
+    <Accordion>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="panel1a-content"
