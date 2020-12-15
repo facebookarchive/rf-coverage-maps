@@ -17,6 +17,9 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
@@ -38,7 +41,6 @@ import getArrow from '../components/ArrowElement';
 import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
-const Arrow = getArrow();
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
@@ -75,8 +77,11 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
     };
   });
 }
+const ArrowPlain = getArrow(false);
+const ArrowGlow = getArrow(true);
 
 function MapScreen(): React.Node {
+  const [arrowGlow, setArrowGlow] = useState<boolean>(false);
   const [unfilteredLayers, setUnfilteredLayers] = useState<LayerDict>({});
   const [filteredLayers, setFilteredLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
@@ -256,7 +261,7 @@ function MapScreen(): React.Node {
           pickable: true,
           // iconAtlas and iconMapping are required
           // $FlowFixMe Images actually work fine.
-          iconAtlas: Arrow,
+          iconAtlas: arrowGlow ? ArrowGlow : ArrowPlain,
           iconMapping: ICON_MAPPING,
           // getIcon: return a string
           getIcon: (_d: Point) => 'marker',
@@ -267,6 +272,7 @@ function MapScreen(): React.Node {
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
           onHover: info => setHoverInfo(info),
+          updateTriggers: {iconAtlas: [arrowGlow]},
         }),
     );
   }
@@ -322,6 +328,35 @@ function MapScreen(): React.Node {
           value={filterMaxHeight}
           onChange={({target}) => setFilterMaxHeight(target.value)}
         />
+      </Accordion>
+    );
+  }
+
+  function buildUISettings() {
+    if (!Object.keys(filteredLayers).length) {
+      return null;
+    }
+    return (
+      <Accordion defaultExpanded={false}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel-filters">
+          <Typography>UI Settings</Typography>
+        </AccordionSummary>
+        <FormGroup row className={classes.formGroup}>
+          <FormControlLabel
+            control={
+              <Switch
+                name={'Arrow Glow'}
+                onChange={() => setArrowGlow(prev => !prev)}
+                checked={arrowGlow}
+                inputProps={{'aria-labelledby': 'arrow-glow'}}
+              />
+            }
+            label="Arrow Glow"
+          />
+        </FormGroup>
       </Accordion>
     );
   }
@@ -427,6 +462,8 @@ function MapScreen(): React.Node {
           {buildFilters()}
           <p />
           <RssiHeightGraph customLayers={filteredLayers} />
+          <Divider className={classes.divider} />
+          {buildUISettings()}
         </Paper>
         <input
           type="file"
@@ -461,6 +498,9 @@ const useStyles = makeStyles(theme => ({
   },
   title: {
     flexGrow: 1,
+  },
+  formGroup: {
+    'padding-left': '10px',
   },
   sideBar: {
     padding: 10,
