@@ -362,6 +362,26 @@ function MapScreen(): React.Node {
     );
   }
 
+  function renderMinMaxRSSI() {
+    if (!isFinite(minRssiToDisplay) && !isFinite(maxRssiToDisplay)) {
+      return null;
+    }
+    return (
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Typography>
+            <b>Max RSSI:</b> {minRssiToDisplay}dBm
+          </Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography>
+            <b>Min RSSI:</b> {maxRssiToDisplay}dBm
+          </Typography>
+        </Grid>
+      </Grid>
+    );
+  }
+
   function closeMapCacheDialog(latitude: ?number, longitude: ?number) {
     if (longitude && latitude) {
       setView({
@@ -422,23 +442,6 @@ function MapScreen(): React.Node {
         <Paper className={classes.sideBar}>
           <Typography variant="body2">Option+click to rotate map</Typography>
           <p />
-          {isFinite(minRssiToDisplay) || isFinite(maxRssiToDisplay) ? (
-            <>
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Typography>
-                    <b>Max RSSI:</b> {minRssiToDisplay}dBm
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography>
-                    <b>Min RSSI:</b> {maxRssiToDisplay}dBm
-                  </Typography>
-                </Grid>
-              </Grid>
-              <p />
-            </>
-          ) : null}
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
@@ -446,6 +449,8 @@ function MapScreen(): React.Node {
           {buildFilters()}
           <RssiHeightGraph customLayers={filteredLayers} />
           {buildUISettings()}
+          <p />
+          {renderMinMaxRSSI()}
         </Paper>
         <input
           type="file"
