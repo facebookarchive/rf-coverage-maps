@@ -453,16 +453,12 @@ function MapScreen(): React.Node {
               <p />
             </>
           ) : null}
-
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
           />
-          <p />
           {buildFilters()}
-          <p />
           <RssiHeightGraph customLayers={filteredLayers} />
-          <Divider className={classes.divider} />
           {buildUISettings()}
         </Paper>
         <input
