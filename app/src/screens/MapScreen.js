@@ -15,10 +15,11 @@ import {useEffect, useMemo, useRef, useState} from 'react';
 import {AppBar, Button} from '@material-ui/core';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormGroup from '@material-ui/core/FormGroup';
+import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-import Divider from '@material-ui/core/Divider';
 import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import CacheMapsDialog from '../components/CacheMapsDialog';
@@ -38,7 +39,6 @@ import getArrow from '../components/ArrowElement';
 import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
-const Arrow = getArrow();
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
@@ -75,8 +75,11 @@ function pointsToXY(points: Array<Point>): Array<XYPoint> {
     };
   });
 }
+const ArrowPlain = getArrow(false);
+const ArrowGlow = getArrow(true);
 
 function MapScreen(): React.Node {
+  const [arrowGlow, setArrowGlow] = useState<boolean>(false);
   const [unfilteredLayers, setUnfilteredLayers] = useState<LayerDict>({});
   const [filteredLayers, setFilteredLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
@@ -256,7 +259,7 @@ function MapScreen(): React.Node {
           pickable: true,
           // iconAtlas and iconMapping are required
           // $FlowFixMe Images actually work fine.
-          iconAtlas: Arrow,
+          iconAtlas: arrowGlow ? ArrowGlow : ArrowPlain,
           iconMapping: ICON_MAPPING,
           // getIcon: return a string
           getIcon: (_d: Point) => 'marker',
@@ -267,18 +270,19 @@ function MapScreen(): React.Node {
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
           onHover: info => setHoverInfo(info),
+          updateTriggers: {iconAtlas: [arrowGlow]},
         }),
     );
   }
 
-  function showMap() {
-    setMapStyle('mapbox://styles/mapbox/light-v9');
-    setSatelliteView(false);
-  }
-
-  function showSatellite() {
-    setMapStyle('mapbox://styles/mapbox/satellite-v9');
-    setSatelliteView(true);
+  function swapSatteliteView() {
+    if (satelliteView) {
+      setMapStyle('mapbox://styles/mapbox/light-v9');
+      setSatelliteView(false);
+    } else {
+      setMapStyle('mapbox://styles/mapbox/satellite-v9');
+      setSatelliteView(true);
+    }
   }
 
   function openMapCacheDialog() {
@@ -286,11 +290,8 @@ function MapScreen(): React.Node {
   }
 
   function buildFilters() {
-    if (!Object.keys(filteredLayers).length) {
-      return null;
-    }
     return (
-      <Accordion defaultExpanded={true}>
+      <Accordion>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel1a-content"
@@ -323,6 +324,61 @@ function MapScreen(): React.Node {
           onChange={({target}) => setFilterMaxHeight(target.value)}
         />
       </Accordion>
+    );
+  }
+
+  function buildUISettings() {
+    return (
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel1a-content"
+          id="panel-filters">
+          <Typography>UI Settings</Typography>
+        </AccordionSummary>
+        <FormGroup className={classes.formGroup}>
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={swapSatteliteView}
+                checked={satelliteView}
+                inputProps={{'aria-labelledby': 'arrow-glow'}}
+              />
+            }
+            label="Satellite View"
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                onChange={() => setArrowGlow(prev => !prev)}
+                checked={arrowGlow}
+                inputProps={{'aria-labelledby': 'arrow-glow'}}
+              />
+            }
+            label="Arrow Glow"
+          />
+        </FormGroup>
+      </Accordion>
+    );
+  }
+
+  function renderMinMaxRSSI() {
+    if (!isFinite(minRssiToDisplay) && !isFinite(maxRssiToDisplay)) {
+      return null;
+    }
+    return (
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          <Typography>
+            <b>Max RSSI:</b> {minRssiToDisplay}dBm
+          </Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography>
+            <b>Min RSSI:</b> {maxRssiToDisplay}dBm
+          </Typography>
+        </Grid>
+      </Grid>
     );
   }
 
@@ -384,39 +440,17 @@ function MapScreen(): React.Node {
           </div>
         </ReactMapGL>
         <Paper className={classes.sideBar}>
-          <Grid container spacing={3} alignItems="stretch" direction="column">
-            <Grid item xs={3}>
-              <ButtonGroup>
-                <Button
-                  variant={satelliteView ? undefined : 'contained'}
-                  color="primary"
-                  onClick={showMap}>
-                  Map
-                </Button>
-                <Button
-                  variant={satelliteView ? 'contained' : undefined}
-                  color="primary"
-                  onClick={showSatellite}>
-                  Satellite
-                </Button>
-              </ButtonGroup>
-            </Grid>
-          </Grid>
-          <Divider className={classes.divider} />
-          <Typography>Highest RSSI: {minRssiToDisplay}dBm</Typography>
-          <p />
-          <Typography>Lowest RSSI: {maxRssiToDisplay}dBm</Typography>
-          <p />
           <Typography variant="body2">Option+click to rotate map</Typography>
           <p />
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
           />
-          <p />
           {buildFilters()}
-          <p />
           <RssiHeightGraph customLayers={filteredLayers} />
+          {buildUISettings()}
+          <p />
+          {renderMinMaxRSSI()}
         </Paper>
         <input
           type="file"
@@ -452,6 +486,9 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1,
   },
+  formGroup: {
+    'padding-left': '10px',
+  },
   sideBar: {
     padding: 10,
     background: 'rgba(255,255,255,0.8)',
@@ -470,9 +507,6 @@ const useStyles = makeStyles(theme => ({
     'max-height': '90%',
     'overflow-y': 'auto',
     'overflow-x': 'hidden',
-  },
-  divider: {
-    margin: theme.spacing(2),
   },
 }));
 

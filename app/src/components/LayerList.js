@@ -32,61 +32,59 @@ type Props = {
 
 export default function LayerList(props: Props): React.Node {
   const {customLayers, setCustomLayers} = props;
-  if (!Object.keys(customLayers).length) {
-    return null;
+
+  function buildLayerList() {
+    if (Object.keys(customLayers).length === 0) {
+      return (
+        <Typography style={{padding: 16}}>
+          No layers! Add some files to get started!
+        </Typography>
+      );
+    }
+    return Object.keys(customLayers).map(name => {
+      const onClick = (shouldDelete: boolean) => () =>
+        setCustomLayers(prevLayers => {
+          const newLayer = {...prevLayers};
+          if (shouldDelete) {
+            delete newLayer[name];
+          } else {
+            const layer = newLayer[name];
+            layer.visible = !layer.visible;
+            newLayer[name] = layer;
+          }
+          return newLayer;
+        });
+      return (
+        <ListItem key={name} dense button onClick={onClick(false)}>
+          <ListItemIcon>
+            <Checkbox
+              edge="start"
+              checked={customLayers[name].visible}
+              tabIndex={-1}
+              disableRipple
+              inputProps={{'aria-labelledby': name}}
+            />
+          </ListItemIcon>
+          <ListItemText primary={name} />
+          <ListItemSecondaryAction>
+            <IconButton edge="end" aria-label="delete" onClick={onClick(true)}>
+              <DeleteIcon />
+            </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      );
+    });
   }
 
   return (
-    <Accordion defaultExpanded={true}>
+    <Accordion>
       <AccordionSummary
         expandIcon={<ExpandMoreIcon />}
         aria-controls="panel1a-content"
         id="panel-layers">
         <Typography>Layers</Typography>
       </AccordionSummary>
-      <List dense={true}>
-        {Object.keys(customLayers).map(name => {
-          const onClick = (shouldDelete: boolean) => () =>
-            setCustomLayers(prevLayers => {
-              const newLayer = {...prevLayers};
-              if (shouldDelete) {
-                delete newLayer[name];
-              } else {
-                const layer = newLayer[name];
-                layer.visible = !layer.visible;
-                newLayer[name] = layer;
-              }
-              return newLayer;
-            });
-          return (
-            <ListItem
-              key={name}
-              role={undefined}
-              dense
-              button
-              onClick={onClick(false)}>
-              <ListItemIcon>
-                <Checkbox
-                  edge="start"
-                  checked={customLayers[name].visible}
-                  tabIndex={-1}
-                  disableRipple
-                  inputProps={{'aria-labelledby': name}}
-                />
-              </ListItemIcon>
-              <ListItemText primary={name} />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={onClick(true)}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          );
-        })}
-      </List>
+      <List dense={true}>{buildLayerList()}</List>
     </Accordion>
   );
 }
