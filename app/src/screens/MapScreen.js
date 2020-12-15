@@ -384,31 +384,41 @@ function MapScreen(): React.Node {
           </div>
         </ReactMapGL>
         <Paper className={classes.sideBar}>
-          <Grid container spacing={3} alignItems="stretch" direction="column">
-            <Grid item xs={3}>
-              <ButtonGroup>
-                <Button
-                  variant={satelliteView ? undefined : 'contained'}
-                  color="primary"
-                  onClick={showMap}>
-                  Map
-                </Button>
-                <Button
-                  variant={satelliteView ? 'contained' : undefined}
-                  color="primary"
-                  onClick={showSatellite}>
-                  Satellite
-                </Button>
-              </ButtonGroup>
-            </Grid>
-          </Grid>
+          <ButtonGroup>
+            <Button
+              variant={satelliteView ? undefined : 'contained'}
+              color="primary"
+              onClick={showMap}>
+              Map
+            </Button>
+            <Button
+              variant={satelliteView ? 'contained' : undefined}
+              color="primary"
+              onClick={showSatellite}>
+              Satellite
+            </Button>
+          </ButtonGroup>
           <Divider className={classes.divider} />
-          <Typography>Highest RSSI: {minRssiToDisplay}dBm</Typography>
-          <p />
-          <Typography>Lowest RSSI: {maxRssiToDisplay}dBm</Typography>
-          <p />
           <Typography variant="body2">Option+click to rotate map</Typography>
           <p />
+          {isFinite(minRssiToDisplay) || isFinite(maxRssiToDisplay) ? (
+            <>
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Typography>
+                    <b>Max RSSI:</b> {minRssiToDisplay}dBm
+                  </Typography>
+                </Grid>
+                <Grid item xs={6}>
+                  <Typography>
+                    <b>Min RSSI:</b> {maxRssiToDisplay}dBm
+                  </Typography>
+                </Grid>
+              </Grid>
+              <p />
+            </>
+          ) : null}
+
           <LayerList
             setCustomLayers={setUnfilteredLayers}
             customLayers={filteredLayers}
