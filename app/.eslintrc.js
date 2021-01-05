@@ -11,27 +11,22 @@
 module.exports = {
   env: {
     browser: true,
-    es2021: true
+    es2021: true,
   },
   parser: 'babel-eslint',
-  extends: [
-    'plugin:react/recommended',
-    'standard',
-    'eslint-config-fbcnms',
-  ],
+  extends: ['plugin:react/recommended', 'standard', 'eslint-config-fbcnms'],
   parserOptions: {
     ecmaFeatures: {
-      jsx: true
+      jsx: true,
     },
     ecmaVersion: 12,
-    sourceType: 'module'
+    sourceType: 'module',
   },
-  plugins: [
-    'react'
-  ],
+  plugins: ['react'],
   rules: {
-    "semi": 0,
-    "object-curly-spacing": 0,
-    "space-before-function-paren": 0,
-  }
-}
+    semi: 0,
+    'object-curly-spacing': 0,
+    'space-before-function-paren': 0,
+    'multiline-ternary': 0,
+  },
+};

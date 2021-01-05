@@ -13,10 +13,13 @@ import App from './app';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  // $FlowFixMe This will always exist or nothing will work.
-  document.getElementById('root'),
-);
+const root = document.getElementById('root');
+
+if (root != null) {
+  ReactDOM.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>,
+    root,
+  );
+}

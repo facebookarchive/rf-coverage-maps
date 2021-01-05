@@ -32,27 +32,32 @@ function SignalStrengthLegend(props: Props): React.Node {
   const values = [...new Array(props.heatmap.length)].map(
     (_, i) => max - bucketSize * i,
   );
+
   return (
     <List dense={true}>
-      {values.map(value => (
-        <ListItem key={value}>
-          <ListItemAvatar>
-            <Box
-              style={{
-                height: 20,
-                width: 20,
-                backgroundColor: `rgba(${getRGBCustom(
-                  value,
-                  min,
-                  max,
-                  props.heatmap,
-                ).join(',')})`,
-              }}
-            />
-          </ListItemAvatar>
-          <ListItemText primary={'< ' + value + 'dBm'} />
-        </ListItem>
-      ))}
+      {values.map(value => {
+        const backgroundColor = `rgba(${getRGBCustom(
+          value,
+          min,
+          max,
+          props.heatmap,
+        ).join(',')})`;
+
+        return (
+          <ListItem key={value}>
+            <ListItemAvatar>
+              <Box
+                style={{
+                  height: 20,
+                  width: 20,
+                  backgroundColor: backgroundColor,
+                }}
+              />
+            </ListItemAvatar>
+            <ListItemText primary={'< ' + value + 'dBm'} />
+          </ListItem>
+        );
+      })}
     </List>
   );
 }

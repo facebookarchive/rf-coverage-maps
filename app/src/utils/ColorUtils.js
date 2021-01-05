@@ -9,10 +9,10 @@
  * @flow strict
  */
 
-import type {RGBAColor} from '@deck.gl/core/utils/color';
+import type {RGBAColor} from '@deck.gl/core';
 
-export type RGB_Type = [number, number, number];
-export type HeatmapType = Array<RGB_Type>;
+export type RGBType = [number, number, number];
+export type HeatmapType = Array<RGBType>;
 
 export const DEFAULT_RANGE: [number, number] = [-105, -60];
 

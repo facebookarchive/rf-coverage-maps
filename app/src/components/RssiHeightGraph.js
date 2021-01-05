@@ -9,22 +9,22 @@
  * @flow
  */
 
+import '../../node_modules/react-vis/dist/style.css';
 import * as React from 'react';
-import {useState} from 'react';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import Typography from '@material-ui/core/Typography';
 import {
-  XYPlot,
-  XAxis,
-  YAxis,
-  HorizontalGridLines,
-  VerticalGridLines,
-  MarkSeries,
   DiscreteColorLegend,
+  HorizontalGridLines,
+  MarkSeries,
+  VerticalGridLines,
+  XAxis,
+  XYPlot,
+  YAxis,
 } from 'react-vis';
-import '../../node_modules/react-vis/dist/style.css';
+import {useState} from 'react';
 
 import type {LayerDict} from '../screens/MapScreen';
 
