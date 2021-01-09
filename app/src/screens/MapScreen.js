@@ -20,6 +20,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import Grid from '@material-ui/core/Grid';
+import MapboxTokenDialog from '../components/MapboxTokenDialog';
 import Paper from '@material-ui/core/Paper';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
 import RssiHeightGraph from '../components/RssiHeightGraph';
@@ -32,13 +33,12 @@ import {AppBar, Button} from '@material-ui/core';
 import {IconLayer} from '@deck.gl/layers';
 import {getRGBTurbo} from '../utils/ColorUtils';
 import {makeStyles} from '@material-ui/core/styles';
+import {useCookies} from 'react-cookie';
 
 import LayerList from '../components/LayerList';
 import getArrow from '../components/ArrowElement';
 
 import type {PickInfo, ViewStateProps} from '@deck.gl/core';
-
-const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
@@ -92,6 +92,7 @@ function MapScreen(): React.Node {
   const [filterMaxRssi, setFilterMaxRssi] = useState<string>('');
   const [filterMinHeight, setFilterMinHeight] = useState<string>('10');
   const [filterMaxHeight, setFilterMaxHeight] = useState<string>('');
+  const [cookies, setCookie] = useCookies(['token']);
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -401,6 +402,12 @@ function MapScreen(): React.Node {
     setCacheMapDialogOpen(false);
   }
 
+  function closeMapboxTokenDialog(token: ?string) {
+    if (token) {
+      setCookie('token', token, {path: '/'});
+    }
+  }
+
   const classes = useStyles();
 
   return (
@@ -435,16 +442,20 @@ function MapScreen(): React.Node {
             </Toolbar>
           </AppBar>
         </div>
-        <ReactMapGL mapboxApiAccessToken={MAPBOX_TOKEN} mapStyle={mapStyle}>
-          <div style={{position: 'absolute', right: 0}}>
-            <NavigationControl showCompass={true} showZoom={false} />
-          </div>
-          <div style={{position: 'absolute', right: 35}}>
-            <Paper className={classes.rightSideBar}>
-              <SignalStrengthLegend />
-            </Paper>
-          </div>
-        </ReactMapGL>
+        {cookies.token ? (
+          <ReactMapGL mapboxApiAccessToken={cookies.token} mapStyle={mapStyle}>
+            <div style={{position: 'absolute', right: 0}}>
+              <NavigationControl showCompass={true} showZoom={false} />
+            </div>
+            <div style={{position: 'absolute', right: 35}}>
+              <Paper className={classes.rightSideBar}>
+                <SignalStrengthLegend />
+              </Paper>
+            </div>
+          </ReactMapGL>
+        ) : (
+          <MapboxTokenDialog onClose={closeMapboxTokenDialog} />
+        )}
         <Paper className={classes.sideBar}>
           <Typography variant="body2">Option+click to rotate map</Typography>
           <p />
