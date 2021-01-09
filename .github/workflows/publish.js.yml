@@ -1,0 +1,32 @@
+# This workflow will do a clean install of node dependencies, build the source code, run tests, and publishes to github.
+
+name: Test and publish to GitHub
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build_push_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm install -g yarn
+      - run: yarn install
+      - run: yarn build
+      - name: Upload
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build.zip
+          asset_name: mything
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "Automatic build of main branch."
+          prerelease: true
