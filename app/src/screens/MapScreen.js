@@ -264,7 +264,7 @@ function MapScreen(): React.Node {
           visible: filteredLayers[name].visible,
           pickable: true,
           // iconAtlas and iconMapping are required
-          // $FlowFixMe Images actually work fine.
+          // $FlowIgnore Images actually work fine.
           iconAtlas: arrowGlow ? ArrowGlow : ArrowPlain,
           iconMapping: ICON_MAPPING,
           // getIcon: return a string
