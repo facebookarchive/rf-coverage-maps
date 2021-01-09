@@ -25,7 +25,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: build.zip
-          asset_name: mything
+          asset_name: rf-coverage-maps.zip
           tag: ${{ github.ref }}
           overwrite: true
           body: "Automatic build of main branch."
