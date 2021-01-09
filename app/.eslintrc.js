@@ -14,7 +14,12 @@ module.exports = {
     es2021: true,
   },
   parser: 'babel-eslint',
-  extends: ['plugin:react/recommended', 'standard', 'eslint-config-fbcnms'],
+  extends: [
+    'react-app',
+    'plugin:react/recommended',
+    'standard',
+    'eslint-config-fbcnms',
+  ],
   parserOptions: {
     ecmaFeatures: {
       jsx: true,

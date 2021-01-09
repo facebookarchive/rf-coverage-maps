@@ -12,31 +12,31 @@
 import * as React from 'react';
 import {useEffect, useMemo, useRef, useState} from 'react';
 
-import {AppBar, Button} from '@material-ui/core';
 import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
+import CacheMapsDialog from '../components/CacheMapsDialog';
+import DeckGL from 'deck.gl';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
-import Switch from '@material-ui/core/Switch';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
-import CacheMapsDialog from '../components/CacheMapsDialog';
-import DeckGL from 'deck.gl';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import {IconLayer} from '@deck.gl/layers';
+import Paper from '@material-ui/core/Paper';
 import ReactMapGL, {NavigationControl} from 'react-map-gl';
-import {makeStyles} from '@material-ui/core/styles';
 import RssiHeightGraph from '../components/RssiHeightGraph';
 import SignalStrengthLegend from '../components/SignalStrengthLegend';
+import Switch from '@material-ui/core/Switch';
+import TextField from '@material-ui/core/TextField';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import {AppBar, Button} from '@material-ui/core';
+import {IconLayer} from '@deck.gl/layers';
 import {getRGBTurbo} from '../utils/ColorUtils';
+import {makeStyles} from '@material-ui/core/styles';
 
 import LayerList from '../components/LayerList';
 import getArrow from '../components/ArrowElement';
 
-import type {ViewStateProps, PickInfo} from '@deck.gl/core/lib/deck';
+import type {PickInfo, ViewStateProps} from '@deck.gl/core';
 
 const MAPBOX_TOKEN = process.env.MAPBOX_TOKEN;
 
@@ -88,10 +88,10 @@ function MapScreen(): React.Node {
   );
   const [satelliteView, setSatelliteView] = useState<boolean>(true);
   const [cacheMapDialogOpen, setCacheMapDialogOpen] = useState<boolean>(false);
-  const [filterMinRssi, setFilterMinRssi] = useState('');
-  const [filterMaxRssi, setFilterMaxRssi] = useState('');
-  const [filterMinHeight, setFilterMinHeight] = useState('10');
-  const [filterMaxHeight, setFilterMaxHeight] = useState('');
+  const [filterMinRssi, setFilterMinRssi] = useState<string>('');
+  const [filterMaxRssi, setFilterMaxRssi] = useState<string>('');
+  const [filterMinHeight, setFilterMinHeight] = useState<string>('10');
+  const [filterMaxHeight, setFilterMaxHeight] = useState<string>('');
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -105,13 +105,13 @@ function MapScreen(): React.Node {
   const [maxRssiToDisplay, minRssiToDisplay] = useMemo<[number, number]>(
     () =>
       Object.keys(unfilteredLayers)
-        .filter(name => unfilteredLayers[name].visible)
+        .filter((name: string) => unfilteredLayers[name].visible)
         .map<[number, number]>((name: string) => [
           unfilteredLayers[name].maxRssi,
           unfilteredLayers[name].minRssi,
         ])
         .reduce(
-          ([max, min], [max2, min2]) => [
+          ([max, min]: [number, number], [max2, min2]) => [
             max > max2 ? max : max2,
             min < min2 ? min : min2,
           ],
@@ -127,20 +127,26 @@ function MapScreen(): React.Node {
       return;
     }
 
-    const newLayers = {};
-    Object.keys(unfilteredLayers).forEach(key => {
+    const newLayers: LayerDict = {};
+    Object.keys(unfilteredLayers).forEach((key: string) => {
       newLayers[key] = {...unfilteredLayers[key]};
       newLayers[key].data = newLayers[key].data.filter(point => {
-        if (filterMinRssi !== '' && point.rssi < filterMinRssi) {
+        if (filterMinRssi !== '' && point.rssi < parseFloat(filterMinRssi)) {
           return false;
         }
-        if (filterMaxRssi !== '' && point.rssi > filterMaxRssi) {
+        if (filterMaxRssi !== '' && point.rssi > parseFloat(filterMaxRssi)) {
           return false;
         }
-        if (filterMinHeight !== '' && point.height < filterMinHeight) {
+        if (
+          filterMinHeight !== '' &&
+          point.height < parseFloat(filterMinHeight)
+        ) {
           return false;
         }
-        if (filterMaxHeight !== '' && point.height > filterMaxHeight) {
+        if (
+          filterMaxHeight !== '' &&
+          point.height > parseFloat(filterMaxHeight)
+        ) {
           return false;
         }
         return true;
@@ -251,7 +257,7 @@ function MapScreen(): React.Node {
 
   function buildLayers() {
     return Object.keys(filteredLayers).map(
-      name =>
+      (name: string) =>
         new IconLayer<Point>({
           id: name,
           data: filteredLayers[name].data,
@@ -265,7 +271,7 @@ function MapScreen(): React.Node {
           getIcon: (_d: Point) => 'marker',
           sizeScale: 2,
           getPosition: d => [d.latitude, d.longitude, d.height],
-          getSize: d => 10,
+          getSize: _d => 10,
           getColor: d => getRGBTurbo(d.rssi),
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
@@ -383,7 +389,7 @@ function MapScreen(): React.Node {
   }
 
   function closeMapCacheDialog(latitude: ?number, longitude: ?number) {
-    if (longitude && latitude) {
+    if (longitude != null && latitude != null) {
       setView({
         latitude: latitude,
         longitude: longitude,

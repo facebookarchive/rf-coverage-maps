@@ -24,7 +24,7 @@ declare module "@deck.gl/core" {
 
     declare export { default as _LayersPass } from "@deck.gl/core/passes/layers-pass";
 
-    declare export { default as Deck } from "@deck.gl/core/lib/deck";
+    declare export { default as Deck, PickInfo, ViewStateProps } from "@deck.gl/core/lib/deck";
 
     declare export { default as LayerManager } from "@deck.gl/core/lib/layer-manager";
 
