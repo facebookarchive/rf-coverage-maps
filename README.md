@@ -7,7 +7,7 @@ To use the software and view the map, you first need to register with MapBox and
 Get a Mapbox Access Token:
 https://docs.mapbox.com/help/glossary/access-token
 
-Next, download the latest release [rf-coverage-maps.zip](https://github.com/facebookexperimental/rf-coverage-maps/releases/download/release/rf-coverage-maps.zip) and unzip the file.  Open the `index.html` file and enter your MapBox token when prompted.
+Next, download the latest release [rf-coverage-maps.zip](https://github.com/facebookexperimental/rf-coverage-maps/releases/latest/download/rf-coverage-maps.zip) and unzip the file.  Open the `index.html` file and enter your MapBox token when prompted.
 
 # For Developers
 Clone this repo:
