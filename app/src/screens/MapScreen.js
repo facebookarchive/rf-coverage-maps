@@ -80,6 +80,7 @@ const ArrowGlow = getArrow(true);
 
 function MapScreen(): React.Node {
   const [arrowGlow, setArrowGlow] = useState<boolean>(false);
+  const [arrowSize, setArrowSize] = useState<number>(10);
   const [unfilteredLayers, setUnfilteredLayers] = useState<LayerDict>({});
   const [filteredLayers, setFilteredLayers] = useState<LayerDict>({});
   const [hoverInfo, setHoverInfo] = useState<?PickInfo<Point>>(null);
@@ -272,12 +273,12 @@ function MapScreen(): React.Node {
           getIcon: (_d: Point) => 'marker',
           sizeScale: 2,
           getPosition: d => [d.latitude, d.longitude, d.height],
-          getSize: _d => 10,
+          getSize: _d => arrowSize,
           getColor: d => getRGBTurbo(d.rssi),
           getAngle: (d: Point) => 180 - d.bearing,
           billboard: false,
           onHover: info => setHoverInfo(info),
-          updateTriggers: {iconAtlas: [arrowGlow]},
+          updateTriggers: {iconAtlas: [arrowGlow], getSize: [arrowSize]},
         }),
     );
   }
@@ -363,6 +364,21 @@ function MapScreen(): React.Node {
               />
             }
             label="Arrow Glow"
+          />
+          <FormControlLabel
+            control={
+              <TextField
+                label="Arrow Size"
+                type="number"
+                value={arrowSize}
+                onChange={({target}) =>
+                  isFinite(target.value)
+                    ? setArrowSize(parseFloat(target.value))
+                    : undefined
+                }
+              />
+            }
+            label={null}
           />
         </FormGroup>
       </Accordion>
