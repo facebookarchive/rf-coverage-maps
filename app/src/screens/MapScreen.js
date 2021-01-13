@@ -95,6 +95,10 @@ function MapScreen(): React.Node {
   const [filterMaxHeight, setFilterMaxHeight] = useState<string>('');
   const [cookies, setCookie] = useCookies(['token']);
 
+  const mapboxToken =
+    new URLSearchParams(window.location.search).get('access_token') ??
+    cookies.token;
+
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
     latitude: 37.483175,
@@ -458,8 +462,8 @@ function MapScreen(): React.Node {
             </Toolbar>
           </AppBar>
         </div>
-        {cookies.token ? (
-          <ReactMapGL mapboxApiAccessToken={cookies.token} mapStyle={mapStyle}>
+        {mapboxToken ? (
+          <ReactMapGL mapboxApiAccessToken={mapboxToken} mapStyle={mapStyle}>
             <div style={{position: 'absolute', right: 0}}>
               <NavigationControl showCompass={true} showZoom={false} />
             </div>
