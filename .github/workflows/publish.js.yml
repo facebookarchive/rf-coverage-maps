@@ -39,4 +39,4 @@ jobs:
           release_name: Build ${{ steps.tag_version.outputs.new_tag }}
           tag: ${{ steps.tag_version.outputs.new_tag }}
           overwrite: true
-          body: Automatic build of main branch {{ steps.tag_version.outputs.changelog }}
+          body: Automatic build of main branch ${{ steps.tag_version.outputs.changelog }}
