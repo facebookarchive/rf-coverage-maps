@@ -1,0 +1,24 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests.
+
+name: Build (and thus test)
+
+on: pull_request
+
+defaults:
+  run:
+    working-directory: app
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      - run: npm install -g yarn
+      - run: yarn install
+      - run: yarn build
