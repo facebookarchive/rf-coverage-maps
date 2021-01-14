@@ -33,7 +33,6 @@ import {AppBar, Button} from '@material-ui/core';
 import {IconLayer} from '@deck.gl/layers';
 import {getRGBTurbo} from '../utils/ColorUtils';
 import {makeStyles} from '@material-ui/core/styles';
-import {useCookies} from 'react-cookie';
 
 import LayerList from '../components/LayerList';
 import getArrow from '../components/ArrowElement';
@@ -43,6 +42,8 @@ import type {PickInfo, ViewStateProps} from '@deck.gl/core';
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 128, height: 128, mask: true},
 };
+
+const TOKEN_KEY = 'mapbox.token';
 
 type Point = {
   latitude: number,
@@ -93,11 +94,16 @@ function MapScreen(): React.Node {
   const [filterMaxRssi, setFilterMaxRssi] = useState<string>('');
   const [filterMinHeight, setFilterMinHeight] = useState<string>('10');
   const [filterMaxHeight, setFilterMaxHeight] = useState<string>('');
-  const [cookies, setCookie] = useCookies(['token']);
+  const [token, setToken] = useState<?string>(() => {
+    const mapboxToken =
+      new URLSearchParams(window.location.search).get('access_token') ??
+      localStorage.getItem(TOKEN_KEY);
+    return mapboxToken;
+  });
 
-  const mapboxToken =
-    new URLSearchParams(window.location.search).get('access_token') ??
-    cookies.token;
+  const [tokenDialogOpen, setTokenDialogOpen] = useState<boolean>(() => {
+    return localStorage.getItem(TOKEN_KEY) == null;
+  });
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
@@ -424,8 +430,10 @@ function MapScreen(): React.Node {
 
   function closeMapboxTokenDialog(token: ?string) {
     if (token) {
-      setCookie('token', token, {path: '/'});
+      localStorage.setItem(TOKEN_KEY, token);
+      setToken(token);
     }
+    setTokenDialogOpen(false);
   }
 
   const classes = useStyles();
@@ -462,8 +470,10 @@ function MapScreen(): React.Node {
             </Toolbar>
           </AppBar>
         </div>
-        {mapboxToken ? (
-          <ReactMapGL mapboxApiAccessToken={mapboxToken} mapStyle={mapStyle}>
+        {tokenDialogOpen ? (
+          <MapboxTokenDialog onClose={closeMapboxTokenDialog} />
+        ) : (
+          <ReactMapGL mapboxApiAccessToken={token} mapStyle={mapStyle}>
             <div style={{position: 'absolute', right: 0}}>
               <NavigationControl showCompass={true} showZoom={false} />
             </div>
@@ -473,8 +483,6 @@ function MapScreen(): React.Node {
               </Paper>
             </div>
           </ReactMapGL>
-        ) : (
-          <MapboxTokenDialog onClose={closeMapboxTokenDialog} />
         )}
         <Paper className={classes.sideBar}>
           <Typography variant="body2">Option+click to rotate map</Typography>
