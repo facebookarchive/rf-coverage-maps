@@ -94,16 +94,17 @@ function MapScreen(): React.Node {
   const [filterMaxRssi, setFilterMaxRssi] = useState<string>('');
   const [filterMinHeight, setFilterMinHeight] = useState<string>('10');
   const [filterMaxHeight, setFilterMaxHeight] = useState<string>('');
-  const [token, setToken] = useState<?string>(() => {
-    const mapboxToken =
+  const [token, setToken] = useState<?string>(
+    () =>
       new URLSearchParams(window.location.search).get('access_token') ??
-      localStorage.getItem(TOKEN_KEY);
-    return mapboxToken;
-  });
+      localStorage.getItem(TOKEN_KEY),
+  );
 
-  const [tokenDialogOpen, setTokenDialogOpen] = useState<boolean>(() => {
-    return localStorage.getItem(TOKEN_KEY) == null;
-  });
+  const [tokenDialogOpen, setTokenDialogOpen] = useState<boolean>(
+    () =>
+      new URLSearchParams(window.location.search).get('access_token') == null &&
+      localStorage.getItem(TOKEN_KEY) == null,
+  );
 
   // Initialize view to MPK Campus
   const [view, setView] = useState<ViewStateProps>({
