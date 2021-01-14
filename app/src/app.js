@@ -11,7 +11,6 @@
 
 import * as React from 'react';
 import MapScreen from './screens/MapScreen';
-import {CookiesProvider} from 'react-cookie';
 import {MuiThemeProvider, createMuiTheme} from '@material-ui/core/styles';
 
 function App(): React.Node {
@@ -31,9 +30,7 @@ function App(): React.Node {
 
   return (
     <MuiThemeProvider theme={theme}>
-      <CookiesProvider>
-        <MapScreen />
-      </CookiesProvider>
+      <MapScreen />
     </MuiThemeProvider>
   );
 }
